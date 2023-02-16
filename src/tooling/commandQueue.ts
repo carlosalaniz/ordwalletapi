@@ -45,7 +45,11 @@ export class CommandQueue {
             const promises = parallelCommands.map(c => c[1].promise);
 
             // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/all#description
-            await Promise.all(promises);
+            try{
+                await Promise.all(promises);
+            }catch(e){
+               // Do nothing, the exception should be handled upstream, run command will catch it too.
+            }
             for (const [queueKey, _] of parallelCommands) {
                 // remove the commands from the queue.
                 delete this.queue[queueKey]
@@ -69,14 +73,19 @@ export class CommandQueue {
         const id = randomUUID();
         this.queue[id] = deferred<any>(
             async () => {
-                const { stdout, stderr } = await execPromise(command)
-                if (stderr) throw stderr;
-                return stdout;
+                try {
+                    const { stdout, stderr } = await execPromise(command)
+                    if (stderr) throw stderr;
+                    return stdout;
+                } catch (e) {
+                    console.log(e);
+                    throw e;
+                }
             }
         );
-        logger.debug(`queue size: ${Object.keys(this.queue).length}`)
+        // logger.debug(`queue size: ${Object.keys(this.queue).length}`)
         const result = await this.queue[id].promise;
-        logger.debug(result);
+        // logger.debug(result);
         return result;
     }
 }

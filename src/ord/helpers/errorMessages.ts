@@ -1,4 +1,8 @@
 // This are the error messages we surface.
-export enum ErrorMessages {
-    NOT_ENOUGH_CARDINAL = "error: wallet does not contain enough cardinal UTXOs, please add additional funds to wallet."
+export enum ErrorCodes {
+    NOT_ENOUGH_CARDINAL = "NOT_ENOUGH_CARDINAL",
+    BAD_ADDRESS_VALUE = "BAD_ADDRESS_VALUE",
+    BAD_INSCRIPTION_VALUE = "BAD_INSCRIPTION_VALUE",
+    INSCRIPTION_NOT_IN_WALLET = "INSCRIPTION_NOT_IN_WALLET"
 }
+

@@ -1,3 +1,4 @@
+import e from "express";
 import config from "../../config";
 import { CommandQueue } from "../../tooling/commandQueue";
 import logger from "../../tooling/logger";
@@ -28,15 +29,16 @@ export class Ord {
     constructor(initOptions: ordInit) {
         setInterval(async () => {
             if (this.indexing) return;
+            this.indexing = true;
             await this.index()
             this.indexing = false;
         }, +config.INDEX_ORD_EVERY)
 
         this.baseCommand = [
             initOptions.binaryPath,
-            "--rpc-url", initOptions.rpcURL,
+            "--rpc-url", `"${initOptions.rpcURL}"`,
             "--data-dir", initOptions.dataDirectory,
-            "-cookie-file", initOptions.cookiePath
+            "--cookie-file", initOptions.cookiePath
         ].join(" ")
 
     }
@@ -56,15 +58,16 @@ export class Ord {
      * @returns Promise<T>
      * @throws stderr
      */
-    async runCommand<T>(command): Promise<T> {
+    async runCommand<T>(command): Promise<T | null> {
         const fullCommand = [this.baseCommand, command].join(" ");
-        const stdout = await this.commandQueue.execute(fullCommand)
         try {
+            const stdout = await this.commandQueue.execute(fullCommand)
             logger.debug(stdout);
-            return JSON.parse(stdout)
-        } catch (stderr) {
-            logger.error(stderr);
-            throw stderr || stdout;
+            if (stdout?.length > 0)
+                return JSON.parse(stdout)
+        } catch (error) {
+            // console.log(error);
+            throw error;
         }
     }
 }

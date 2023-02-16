@@ -18,7 +18,7 @@ class Config {
     #BTC_NODES: BTC_NODES_CONFIG[] = null;
     get BTC_NODES() {
         if (this.#BTC_NODES) return this.#BTC_NODES;
-        const value = process.env.BTC_NODES ?? "192.168.1.34:8332;/.cookie"
+        const value = process.env.BTC_NODES ?? "http://192.168.1.34:8332;/home/user/carlos.cookie"
         const nodesConfig: BTC_NODES_CONFIG[] = value.split(",").map(v => {
             const btc_node_paths = v.split(";");
             return {
@@ -34,7 +34,7 @@ class Config {
     #ORD_BINARY_PATHS: ORD_BINARY_PATHS[] = null
     get ORD_BINARY_PATHS() {
         if (this.#ORD_BINARY_PATHS) return this.#ORD_BINARY_PATHS;
-        const value = process.env.ORD_DATA_PATHS ?? "5.0:/home/user/ver/ord/target/release:/home/user/docker/data.copy/5.0/"
+        const value = process.env.ORD_DATA_PATHS ?? "5.0:/home/user/ver/ord/target/release/ord:/home/user/docker/data.copy/5.0/"
         const ordDataPaths: ORD_BINARY_PATHS[] = value.split(",").map(v => {
             const pathValues = v.split(":");
             return {
@@ -54,12 +54,12 @@ class Config {
 
     // amount of time in ms before the rate-limited is reset
     get NO_API_KEY_RATE_LIMITER_EXPIRE() {
-        return process.env.NO_API_KEY_RATE_LIMITER_EXPIRE ?? "5000"
+        return +process.env.NO_API_KEY_RATE_LIMITER_EXPIRE ?? 5000
     };
 
     // amount of time in ms ord should try to index
     get INDEX_ORD_EVERY() {
-        return process.env.INDEX_ORD_EVERY ?? "5000"
+        return +process.env.INDEX_ORD_EVERY ?? 60 * 60 * 1000; // once every hour.
     };
 }
 export default new Config()

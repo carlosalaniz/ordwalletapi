@@ -3,21 +3,26 @@ import { BTCAddress } from "./helpers/BTCAddress";
 import { BTCTransactions } from "./helpers/BTCTransactions";
 import { BTCWallet } from "./helpers/BTCWallet";
 import { CardinalBalance } from "./helpers/cardinalBalance";
-import { ErrorMessages } from "./helpers/errorMessages";
+import { ErrorCodes } from "./helpers/errorMessages";
 import { Inscription, InscriptionCreationResult } from "./helpers/inscription";
 import { Ord } from "./helpers/ord";
 import { Satpoint } from "./helpers/satpoint";
 import { BTCTransaction } from "./helpers/transacation";
 import { WalletCreateMnemonic as WalletMnemonic } from "./helpers/walletCreateNemonic";
+import loadBalancer from "./loadBalancer";
 
 // This class provides an light async wrapper to https://github.com/casey/ord 
 export class OrdBridge {
-    constructor(private ordInstance: Ord, private Wallet: BTCWallet) { }
+    private ordInstance: Ord;
+    constructor(private Wallet: BTCWallet) {
+        this.ordInstance = loadBalancer.getInstance();
+    }
 
     /**
      * Create a new wallet
      */
-    static async create(ordInstance: Ord, name: string = randomUUID()): Promise<[WalletMnemonic, BTCWallet]> {
+    static async create(name: string = randomUUID()): Promise<[WalletMnemonic, BTCWallet]> {
+        const ordInstance = loadBalancer.getInstance()
         const wallet = new BTCWallet(name);
         const command = ["--wallet", name, "wallet", "create"].join(" ");
         const result = await ordInstance.runCommand<WalletMnemonic>(command);
@@ -43,7 +48,7 @@ export class OrdBridge {
      * See wallet transactions
      * @param limit Fetch at most <LIMIT> transactions
      */
-    async transactions(limit: number): Promise<BTCTransactions[]> {
+    async transactions(limit?: number): Promise<BTCTransactions[]> {
         const command = ["--wallet", this.Wallet.id, "wallet", "transactions"].join(" ");
         const result = await this.ordInstance.runCommand<BTCTransactions[]>(command);
         return result;
@@ -64,7 +69,7 @@ export class OrdBridge {
      * @param feeRate  Use fee rate of <FEE_RATE> sats/vB [default: 2.0]
      * @param satpoint Sat to Inscribe
      */
-    async inscribe(filePath: string, feeRate: number = 2, options: { satpoint?: Satpoint, dryRun?: boolean }): Promise<InscriptionCreationResult | ErrorMessages> {
+    async inscribe(filePath: string, feeRate: number = 2, options: { satpoint?: Satpoint, dryRun?: boolean }): Promise<InscriptionCreationResult | ErrorCodes> {
         var command_elements = [
             "--wallet",
             this.Wallet.id,
@@ -85,9 +90,11 @@ export class OrdBridge {
         try {
             return await this.ordInstance.runCommand<InscriptionCreationResult>(command);
         } catch (e) {
-            switch (e) {
-                case ErrorMessages.NOT_ENOUGH_CARDINAL:
-                    return ErrorMessages.NOT_ENOUGH_CARDINAL
+            if ([
+                "error: wallet does not contain enough cardinal UTXOs, please add additional funds to wallet.",
+                "error: wallet contains no cardinal utxos"
+            ].includes(e.stderr?.trim())) {
+                return ErrorCodes.NOT_ENOUGH_CARDINAL
             }
             throw e;
         }
@@ -109,14 +116,29 @@ export class OrdBridge {
      * @param feeRate Use fee rate of <FEE_RATE> sats/vB [default: 1.0]
      * @returns Transaction id in string
      */
-    async send(address: BTCAddress, inscription: Inscription, feeRate: number): Promise<BTCTransaction> {
+    async send(address: BTCAddress, inscription: Inscription | string, feeRate: number): Promise<BTCTransaction | ErrorCodes> {
+        const id = (inscription instanceof Inscription) ? inscription.inscription : inscription;
         const command = [
             "--wallet", this.Wallet.id,
             "wallet", "send",
-            address.address, inscription.inscription,
+            address.address, id,
             "--fee-rate", feeRate
         ].join(" ");
-        const result = await this.ordInstance.runCommand<string>(command);
-        return { transactionId: result };
+        try {
+            const result = await this.ordInstance.runCommand<string>(command);
+            return { transactionId: result };
+        } catch (e) {
+            const error = e.stderr;
+            if (/Invalid value.+<ADDRESS>/.test(error)) {
+                return ErrorCodes.BAD_ADDRESS_VALUE;
+            }
+            if (/Invalid value.+<OUTGOING>/.test(error)) {
+                return ErrorCodes.BAD_INSCRIPTION_VALUE;
+            }
+            if (/outgoing satpoint.+not in wallet/.test(error)) {
+                return ErrorCodes.INSCRIPTION_NOT_IN_WALLET
+            }
+            throw e;
+        }
     }
-}   
+}

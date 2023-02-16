@@ -6,9 +6,9 @@ import { Tags, Route, Security, Controller, Post, Body } from "tsoa";
 export class WalletController extends Controller {
     @Post("register")
     async register(
-        @Body() registerInfo :{
-            username:string,
-            password:string
+        @Body() registerInfo: {
+            username: string,
+            password: string
         }
     ) {
         throw "not implemented";
@@ -16,9 +16,9 @@ export class WalletController extends Controller {
 
     @Post("login")
     async login(
-        @Body() loginInfo :{
-            username:string,
-            password:string
+        @Body() loginInfo: {
+            username: string,
+            password: string
         }
     ) {
         throw "not implemented";
