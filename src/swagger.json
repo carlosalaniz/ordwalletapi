@@ -1,0 +1,458 @@
+{
+	"components": {
+		"examples": {},
+		"headers": {},
+		"parameters": {},
+		"requestBodies": {},
+		"responses": {},
+		"schemas": {
+			"WalletMnemonic": {
+				"properties": {
+					"mnemonic": {
+						"type": "string",
+						"description": "Example: \"forum now icon hunt best ensure social muffin slab travel perfect burger\""
+					}
+				},
+				"required": [
+					"mnemonic"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"BTCWallet": {
+				"properties": {
+					"id": {
+						"type": "string",
+						"description": "Name of the wallet, this will create a folder in the .bitcoin/wallets location."
+					}
+				},
+				"required": [
+					"id"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"CardinalBalance": {
+				"properties": {
+					"cardinal": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"cardinal"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"BTCTransactions": {
+				"properties": {
+					"transaction": {
+						"type": "string"
+					},
+					"confirmations": {
+						"type": "number",
+						"enum": [
+							4
+						],
+						"nullable": false
+					}
+				},
+				"required": [
+					"transaction",
+					"confirmations"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"InscriptionCreationResult": {
+				"description": "Inscription creation result.",
+				"properties": {
+					"commit": {
+						"type": "string",
+						"description": "Example: \"43a719dc2a5113df2a59c9b84a28e9c8a6f880e7c88c89a61f0980fe20843cb0\""
+					},
+					"inscription": {
+						"type": "string",
+						"description": "Example: \"81171dd249c959afec82221ad7467cf52b37f76a1d78e0ed2999528937b9340bi0\";"
+					},
+					"reveal": {
+						"type": "string",
+						"description": "Example: \"81171dd249c959afec82221ad7467cf52b37f76a1d78e0ed2999528937b9340b\";"
+					},
+					"fees": {
+						"type": "number",
+						"format": "double",
+						"description": "Example: 9360;"
+					}
+				},
+				"required": [
+					"commit",
+					"inscription",
+					"reveal",
+					"fees"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ErrorMessages": {
+				"enum": [
+					"error: wallet does not contain enough cardinal UTXOs, please add additional funds to wallet."
+				],
+				"type": "string"
+			},
+			"BTCAddress": {
+				"properties": {
+					"address": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"address"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"BTCTransaction": {
+				"properties": {
+					"transactionId": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"transactionId"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Inscription": {
+				"description": "Inscription query result",
+				"properties": {
+					"inscription": {
+						"type": "string",
+						"description": "Example: \"bebefd42cf76983bdd24df8dfd565b816a049ef78b1dd5c5797b7be3bb8fd9c1i0\""
+					},
+					"location": {
+						"type": "string",
+						"description": "Example: \"bebefd42cf76983bdd24df8dfd565b816a049ef78b1dd5c5797b7be3bb8fd9c1:0:0\""
+					},
+					"explorer": {
+						"type": "string",
+						"description": "Example: \"https://ordinals.com/inscription/bebefd42cf76983bdd24df8dfd565b816a049ef78b1dd5c5797b7be3bb8fd9c1i0\""
+					}
+				},
+				"required": [
+					"inscription",
+					"location",
+					"explorer"
+				],
+				"type": "object",
+				"additionalProperties": false
+			}
+		},
+		"securitySchemes": {
+			"jwt": {
+				"type": "apiKey",
+				"name": "Authorization",
+				"in": "header"
+			},
+			"api_key": {
+				"type": "apiKey",
+				"name": "access_token",
+				"in": "query"
+			}
+		}
+	},
+	"info": {
+		"title": "ordinals-wallet-api",
+		"version": "0.0.1",
+		"license": {
+			"name": "ISC"
+		},
+		"contact": {}
+	},
+	"openapi": "3.0.0",
+	"paths": {
+		"/status": {
+			"get": {
+				"operationId": "Status",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"wallet"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/create": {
+			"post": {
+				"operationId": "Create",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"btcWallet": {
+											"$ref": "#/components/schemas/BTCWallet"
+										},
+										"walletMnemonic": {
+											"$ref": "#/components/schemas/WalletMnemonic"
+										}
+									},
+									"required": [
+										"btcWallet",
+										"walletMnemonic"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"wallet"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/restore": {
+			"post": {
+				"operationId": "Restore",
+				"responses": {
+					"204": {
+						"description": "No content"
+					}
+				},
+				"tags": [
+					"wallet"
+				],
+				"security": [
+					{
+						"api_key": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/balance": {
+			"get": {
+				"operationId": "Balance",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/CardinalBalance"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"wallet"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/transactions": {
+			"get": {
+				"operationId": "Transactions",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/BTCTransactions"
+									},
+									"type": "array"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"wallet"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/inscribe": {
+			"post": {
+				"operationId": "Inscribe",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/InscriptionCreationResult"
+										},
+										{
+											"$ref": "#/components/schemas/ErrorMessages"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"wallet"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"multipart/form-data": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"file": {
+										"type": "string",
+										"format": "binary"
+									},
+									"feeRate": {
+										"type": "string"
+									},
+									"satpoint": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"file",
+									"feeRate"
+								]
+							}
+						}
+					}
+				}
+			}
+		},
+		"/receive": {
+			"get": {
+				"operationId": "Receive",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/BTCAddress"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"wallet"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/send": {
+			"post": {
+				"operationId": "Send",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/BTCTransaction"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"wallet"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"feeRate": {
+										"type": "number",
+										"format": "double"
+									},
+									"inscription": {
+										"$ref": "#/components/schemas/Inscription"
+									},
+									"address": {
+										"$ref": "#/components/schemas/BTCAddress"
+									}
+								},
+								"required": [
+									"feeRate",
+									"inscription",
+									"address"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		}
+	},
+	"servers": [
+		{
+			"url": "/"
+		}
+	]
+}
