@@ -49,17 +49,24 @@ class Config {
 
     // Number allowed number of requests before getting rate limited
     get NO_API_KEY_RATE_LIMITER() {
-        return process.env.NO_API_KEY_RATE_LIMITER ?? "1"
+        return process.env.NO_API_KEY_RATE_LIMITER ? +process.env.NO_API_KEY_RATE_LIMITER : "1";
     };
 
     // amount of time in ms before the rate-limited is reset
     get NO_API_KEY_RATE_LIMITER_EXPIRE() {
-        return +process.env.NO_API_KEY_RATE_LIMITER_EXPIRE ?? 5000
+        return process.env.NO_API_KEY_RATE_LIMITER_EXPIRE ? +process.env.NO_API_KEY_RATE_LIMITER_EXPIRE : 5000;
     };
 
     // amount of time in ms ord should try to index
     get INDEX_ORD_EVERY() {
-        return +process.env.INDEX_ORD_EVERY ?? 60 * 60 * 1000; // once every hour.
+        return process.env.INDEX_ORD_EVERY ? +process.env.INDEX_ORD_EVERY : 60 * 60 * 1000; // once every hour.
     };
+
+    // amount of time in ms ord should try to index
+    get INSCRIPTIONS_IMAGE_FOLDER() {
+        return process.env.INSCRIPTIONS_IMAGE_FOLDER ?? "/home/user/inscriptions/"; // once every hour.
+    };
+
+
 }
 export default new Config()

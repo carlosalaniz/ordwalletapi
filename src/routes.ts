@@ -3,6 +3,8 @@
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { Controller, ValidationService, FieldErrors, ValidateError, TsoaRoute, HttpStatusCodeLiteral, TsoaResponse, fetchMiddlewares } from '@tsoa/runtime';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+import { AuthenticationController } from './controllers/authentication.controller';
+// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { WalletController } from './controllers/wallet.controller';
 import { expressAuthentication } from './authentication';
 // @ts-ignore - no great way to install types from subpackage
@@ -38,6 +40,11 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ErrorCodes": {
+        "dataType": "refEnum",
+        "enums": ["NOT_ENOUGH_CARDINAL","BAD_ADDRESS_VALUE","BAD_INSCRIPTION_VALUE","INSCRIPTION_NOT_IN_WALLET"],
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "BTCTransactions": {
         "dataType": "refObject",
         "properties": {
@@ -47,9 +54,22 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "BTCTransaction": {
+        "dataType": "refObject",
+        "properties": {
+            "version": {"dataType":"double","required":true},
+            "lock_time": {"dataType":"double","required":true},
+            "input": {"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"witness":{"dataType":"array","array":{"dataType":"string"},"required":true},"sequence":{"dataType":"double","required":true},"script_sig":{"dataType":"string","required":true},"previous_output":{"dataType":"string","required":true}}},"required":true},
+            "output": {"dataType":"array","array":{"dataType":"nestedObjectLiteral","nestedProperties":{"script_pubkey":{"dataType":"string","required":true},"value":{"dataType":"double","required":true}}},"required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "InscriptionCreationResult": {
         "dataType": "refObject",
         "properties": {
+            "commit_tx": {"ref":"BTCTransaction"},
+            "reveal_tx": {"ref":"BTCTransaction"},
             "commit": {"dataType":"string","required":true},
             "inscription": {"dataType":"string","required":true},
             "reveal": {"dataType":"string","required":true},
@@ -58,23 +78,10 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "ErrorMessages": {
-        "dataType": "refEnum",
-        "enums": ["error: wallet does not contain enough cardinal UTXOs, please add additional funds to wallet."],
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "BTCAddress": {
         "dataType": "refObject",
         "properties": {
             "address": {"dataType":"string","required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "BTCTransaction": {
-        "dataType": "refObject",
-        "properties": {
-            "transactionId": {"dataType":"string","required":true},
         },
         "additionalProperties": false,
     },
@@ -99,8 +106,57 @@ export function RegisterRoutes(app: Router) {
     //  NOTE: If you do not see routes for all of your controllers in this file, then you might not have informed tsoa of where to look
     //      Please look into the "controllerPathGlobs" config option described in the readme: https://github.com/lukeautry/tsoa
     // ###########################################################################################################
-        app.get('/status',
-            authenticateMiddleware([{"api_key":[]}]),
+        app.post('/authentication/register',
+            ...(fetchMiddlewares<RequestHandler>(AuthenticationController)),
+            ...(fetchMiddlewares<RequestHandler>(AuthenticationController.prototype.register)),
+
+            function AuthenticationController_register(request: any, response: any, next: any) {
+            const args = {
+                    registerInfo: {"in":"body","name":"registerInfo","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"password":{"dataType":"string","required":true},"username":{"dataType":"string","required":true}}},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = getValidatedArgs(args, request, response);
+
+                const controller = new AuthenticationController();
+
+
+              const promise = controller.register.apply(controller, validatedArgs as any);
+              promiseHandler(controller, promise, response, undefined, next);
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.post('/authentication/login',
+            ...(fetchMiddlewares<RequestHandler>(AuthenticationController)),
+            ...(fetchMiddlewares<RequestHandler>(AuthenticationController.prototype.login)),
+
+            function AuthenticationController_login(request: any, response: any, next: any) {
+            const args = {
+                    loginInfo: {"in":"body","name":"loginInfo","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"password":{"dataType":"string","required":true},"username":{"dataType":"string","required":true}}},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = getValidatedArgs(args, request, response);
+
+                const controller = new AuthenticationController();
+
+
+              const promise = controller.login.apply(controller, validatedArgs as any);
+              promiseHandler(controller, promise, response, undefined, next);
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.get('/wallet/status',
             ...(fetchMiddlewares<RequestHandler>(WalletController)),
             ...(fetchMiddlewares<RequestHandler>(WalletController.prototype.status)),
 
@@ -124,8 +180,7 @@ export function RegisterRoutes(app: Router) {
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.post('/create',
-            authenticateMiddleware([{"api_key":[]}]),
+        app.post('/wallet/create',
             ...(fetchMiddlewares<RequestHandler>(WalletController)),
             ...(fetchMiddlewares<RequestHandler>(WalletController.prototype.create)),
 
@@ -149,8 +204,7 @@ export function RegisterRoutes(app: Router) {
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.post('/restore',
-            authenticateMiddleware([{"api_key":[]}]),
+        app.post('/wallet/restore',
             ...(fetchMiddlewares<RequestHandler>(WalletController)),
             ...(fetchMiddlewares<RequestHandler>(WalletController.prototype.restore)),
 
@@ -174,13 +228,13 @@ export function RegisterRoutes(app: Router) {
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.get('/balance',
-            authenticateMiddleware([{"jwt":[]}]),
+        app.get('/wallet/balance',
             ...(fetchMiddlewares<RequestHandler>(WalletController)),
             ...(fetchMiddlewares<RequestHandler>(WalletController.prototype.balance)),
 
             function WalletController_balance(request: any, response: any, next: any) {
             const args = {
+                    walletId: {"in":"query","name":"walletId","required":true,"dataType":"any"},
             };
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -199,13 +253,13 @@ export function RegisterRoutes(app: Router) {
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.get('/transactions',
-            authenticateMiddleware([{"jwt":[]}]),
+        app.get('/wallet/transactions',
             ...(fetchMiddlewares<RequestHandler>(WalletController)),
             ...(fetchMiddlewares<RequestHandler>(WalletController.prototype.transactions)),
 
             function WalletController_transactions(request: any, response: any, next: any) {
             const args = {
+                    walletId: {"in":"query","name":"walletId","required":true,"dataType":"any"},
             };
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -224,17 +278,17 @@ export function RegisterRoutes(app: Router) {
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.post('/inscribe',
-            authenticateMiddleware([{"jwt":[]}]),
+        app.post('/wallet/inscribe',
             upload.single('file'),
             ...(fetchMiddlewares<RequestHandler>(WalletController)),
             ...(fetchMiddlewares<RequestHandler>(WalletController.prototype.inscribe)),
 
             function WalletController_inscribe(request: any, response: any, next: any) {
             const args = {
+                    walletId: {"in":"query","name":"walletId","required":true,"dataType":"any"},
                     file: {"in":"formData","name":"file","required":true,"dataType":"file"},
+                    dryRun: {"in":"formData","name":"dryRun","dataType":"string"},
                     feeRate: {"in":"formData","name":"feeRate","required":true,"dataType":"string"},
-                    satpoint: {"in":"formData","name":"satpoint","dataType":"string"},
             };
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -253,13 +307,13 @@ export function RegisterRoutes(app: Router) {
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.get('/receive',
-            authenticateMiddleware([{"jwt":[]}]),
+        app.get('/wallet/receive',
             ...(fetchMiddlewares<RequestHandler>(WalletController)),
             ...(fetchMiddlewares<RequestHandler>(WalletController.prototype.receive)),
 
             function WalletController_receive(request: any, response: any, next: any) {
             const args = {
+                    walletId: {"in":"query","name":"walletId","required":true,"dataType":"any"},
             };
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -278,14 +332,14 @@ export function RegisterRoutes(app: Router) {
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.post('/send',
-            authenticateMiddleware([{"jwt":[]}]),
+        app.post('/wallet/send',
             ...(fetchMiddlewares<RequestHandler>(WalletController)),
             ...(fetchMiddlewares<RequestHandler>(WalletController.prototype.send)),
 
             function WalletController_send(request: any, response: any, next: any) {
             const args = {
-                    body: {"in":"body","name":"body","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"feeRate":{"dataType":"double","required":true},"inscription":{"ref":"Inscription","required":true},"address":{"ref":"BTCAddress","required":true}}},
+                    walletId: {"in":"query","name":"walletId","required":true,"dataType":"any"},
+                    body: {"in":"body","name":"body","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"feeRate":{"dataType":"double","required":true},"inscription":{"dataType":"union","subSchemas":[{"ref":"Inscription"},{"dataType":"string"}],"required":true},"addressTo":{"ref":"BTCAddress","required":true}}},
             };
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -307,65 +361,6 @@ export function RegisterRoutes(app: Router) {
 
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 
-
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-    function authenticateMiddleware(security: TsoaRoute.Security[] = []) {
-        return async function runAuthenticationMiddleware(request: any, _response: any, next: any) {
-
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-            // keep track of failed auth attempts so we can hand back the most
-            // recent one.  This behavior was previously existing so preserving it
-            // here
-            const failedAttempts: any[] = [];
-            const pushAndRethrow = (error: any) => {
-                failedAttempts.push(error);
-                throw error;
-            };
-
-            const secMethodOrPromises: Promise<any>[] = [];
-            for (const secMethod of security) {
-                if (Object.keys(secMethod).length > 1) {
-                    const secMethodAndPromises: Promise<any>[] = [];
-
-                    for (const name in secMethod) {
-                        secMethodAndPromises.push(
-                            expressAuthentication(request, name, secMethod[name])
-                                .catch(pushAndRethrow)
-                        );
-                    }
-
-                    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-                    secMethodOrPromises.push(Promise.all(secMethodAndPromises)
-                        .then(users => { return users[0]; }));
-                } else {
-                    for (const name in secMethod) {
-                        secMethodOrPromises.push(
-                            expressAuthentication(request, name, secMethod[name])
-                                .catch(pushAndRethrow)
-                        );
-                    }
-                }
-            }
-
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-            try {
-                request['user'] = await promiseAny.call(Promise, secMethodOrPromises);
-                next();
-            }
-            catch(err) {
-                // Show most recent error as response
-                const error = failedAttempts.pop();
-                error.status = error.status || 401;
-                next(error);
-            }
-
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        }
-    }
 
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 

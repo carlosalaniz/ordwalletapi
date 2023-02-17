@@ -2,7 +2,7 @@
 
 import config from "../config"
 import { Ord } from "./helpers/ord"
-import { OrdBridge } from "./ordBridge"
+
 type ORD_STATE = {
     [version: string]: {
         binPath: string,

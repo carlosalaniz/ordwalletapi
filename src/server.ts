@@ -14,14 +14,17 @@ import { RegisterRoutes } from "./routes";
     const app = express();
     app.use(cors());
     app.use(bodyParser.json());
+    app.use(function logMethod(req, res, next) {
+        console.log(`POST ${req.originalUrl}`, req.headers["x-real-ip"], new Date());
+        next()
+    });
     app.use(["/openapi", "/docs", "/swagger"], swaggerUI.serve, swaggerUI.setup(swaggerJson));
-
     RegisterRoutes(app);
     app.listen(port, "0.0.0.0", async () => {
         console.log("Config:")
         Object.entries(config).forEach(configEntry => {
-            if(['string', 'number'].includes(typeof configEntry[1]))
-            console.log(configEntry[0], configEntry[1]);
+            if (['string', 'number'].includes(typeof configEntry[1]))
+                console.log(configEntry[0], configEntry[1]);
         })
         console.log(`⚡️[server]: Server is running at http://localhost:${port}/docs/`);
     });

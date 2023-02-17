@@ -1,9 +1,9 @@
 import { Tags, Route, Security, Controller, Post, Body } from "tsoa";
 
-@Tags("wallet")
+@Tags("authentication")
 @Route("/authentication")
-@Security('api_key')
-export class WalletController extends Controller {
+// @Security('api_key')
+export class AuthenticationController extends Controller {
     @Post("register")
     async register(
         @Body() registerInfo: {

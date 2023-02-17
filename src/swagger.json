@@ -45,6 +45,15 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"ErrorCodes": {
+				"enum": [
+					"NOT_ENOUGH_CARDINAL",
+					"BAD_ADDRESS_VALUE",
+					"BAD_INSCRIPTION_VALUE",
+					"INSCRIPTION_NOT_IN_WALLET"
+				],
+				"type": "string"
+			},
 			"BTCTransactions": {
 				"properties": {
 					"transaction": {
@@ -65,9 +74,85 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"BTCTransaction": {
+				"description": "Represents a raw, unsigned bitcoin transactions",
+				"properties": {
+					"version": {
+						"type": "number",
+						"format": "double"
+					},
+					"lock_time": {
+						"type": "number",
+						"format": "double"
+					},
+					"input": {
+						"items": {
+							"properties": {
+								"witness": {
+									"items": {
+										"type": "string"
+									},
+									"type": "array"
+								},
+								"sequence": {
+									"type": "number",
+									"format": "double"
+								},
+								"script_sig": {
+									"type": "string"
+								},
+								"previous_output": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"witness",
+								"sequence",
+								"script_sig",
+								"previous_output"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					},
+					"output": {
+						"items": {
+							"properties": {
+								"script_pubkey": {
+									"type": "string"
+								},
+								"value": {
+									"type": "number",
+									"format": "double"
+								}
+							},
+							"required": [
+								"script_pubkey",
+								"value"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"version",
+					"lock_time",
+					"input",
+					"output"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"InscriptionCreationResult": {
 				"description": "Inscription creation result.",
 				"properties": {
+					"commit_tx": {
+						"$ref": "#/components/schemas/BTCTransaction"
+					},
+					"reveal_tx": {
+						"$ref": "#/components/schemas/BTCTransaction"
+					},
 					"commit": {
 						"type": "string",
 						"description": "Example: \"43a719dc2a5113df2a59c9b84a28e9c8a6f880e7c88c89a61f0980fe20843cb0\""
@@ -95,12 +180,6 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"ErrorMessages": {
-				"enum": [
-					"error: wallet does not contain enough cardinal UTXOs, please add additional funds to wallet."
-				],
-				"type": "string"
-			},
 			"BTCAddress": {
 				"properties": {
 					"address": {
@@ -109,18 +188,6 @@
 				},
 				"required": [
 					"address"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"BTCTransaction": {
-				"properties": {
-					"transactionId": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"transactionId"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -173,7 +240,81 @@
 	},
 	"openapi": "3.0.0",
 	"paths": {
-		"/status": {
+		"/authentication/register": {
+			"post": {
+				"operationId": "Register",
+				"responses": {
+					"204": {
+						"description": "No content"
+					}
+				},
+				"tags": [
+					"authentication"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"password": {
+										"type": "string"
+									},
+									"username": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"password",
+									"username"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/authentication/login": {
+			"post": {
+				"operationId": "Login",
+				"responses": {
+					"204": {
+						"description": "No content"
+					}
+				},
+				"tags": [
+					"authentication"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"password": {
+										"type": "string"
+									},
+									"username": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"password",
+									"username"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/wallet/status": {
 			"get": {
 				"operationId": "Status",
 				"responses": {
@@ -191,15 +332,11 @@
 				"tags": [
 					"wallet"
 				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
+				"security": [],
 				"parameters": []
 			}
 		},
-		"/create": {
+		"/wallet/create": {
 			"post": {
 				"operationId": "Create",
 				"responses": {
@@ -229,34 +366,33 @@
 				"tags": [
 					"wallet"
 				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
+				"security": [],
 				"parameters": []
 			}
 		},
-		"/restore": {
+		"/wallet/restore": {
 			"post": {
 				"operationId": "Restore",
 				"responses": {
-					"204": {
-						"description": "No content"
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
 					}
 				},
 				"tags": [
 					"wallet"
 				],
-				"security": [
-					{
-						"api_key": []
-					}
-				],
+				"security": [],
 				"parameters": []
 			}
 		},
-		"/balance": {
+		"/wallet/balance": {
 			"get": {
 				"operationId": "Balance",
 				"responses": {
@@ -265,7 +401,14 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/CardinalBalance"
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/CardinalBalance"
+										},
+										{
+											"$ref": "#/components/schemas/ErrorCodes"
+										}
+									]
 								}
 							}
 						}
@@ -274,15 +417,20 @@
 				"tags": [
 					"wallet"
 				],
-				"security": [
+				"security": [],
+				"parameters": [
 					{
-						"jwt": []
+						"in": "query",
+						"name": "walletId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
 					}
-				],
-				"parameters": []
+				]
 			}
 		},
-		"/transactions": {
+		"/wallet/transactions": {
 			"get": {
 				"operationId": "Transactions",
 				"responses": {
@@ -291,10 +439,17 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"items": {
-										"$ref": "#/components/schemas/BTCTransactions"
-									},
-									"type": "array"
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/ErrorCodes"
+										},
+										{
+											"items": {
+												"$ref": "#/components/schemas/BTCTransactions"
+											},
+											"type": "array"
+										}
+									]
 								}
 							}
 						}
@@ -303,15 +458,20 @@
 				"tags": [
 					"wallet"
 				],
-				"security": [
+				"security": [],
+				"parameters": [
 					{
-						"jwt": []
+						"in": "query",
+						"name": "walletId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
 					}
-				],
-				"parameters": []
+				]
 			}
 		},
-		"/inscribe": {
+		"/wallet/inscribe": {
 			"post": {
 				"operationId": "Inscribe",
 				"responses": {
@@ -325,7 +485,7 @@
 											"$ref": "#/components/schemas/InscriptionCreationResult"
 										},
 										{
-											"$ref": "#/components/schemas/ErrorMessages"
+											"$ref": "#/components/schemas/ErrorCodes"
 										}
 									]
 								}
@@ -336,12 +496,17 @@
 				"tags": [
 					"wallet"
 				],
-				"security": [
+				"security": [],
+				"parameters": [
 					{
-						"jwt": []
+						"in": "query",
+						"name": "walletId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
 					}
 				],
-				"parameters": [],
 				"requestBody": {
 					"required": true,
 					"content": {
@@ -353,10 +518,10 @@
 										"type": "string",
 										"format": "binary"
 									},
-									"feeRate": {
+									"dryRun": {
 										"type": "string"
 									},
-									"satpoint": {
+									"feeRate": {
 										"type": "string"
 									}
 								},
@@ -370,7 +535,7 @@
 				}
 			}
 		},
-		"/receive": {
+		"/wallet/receive": {
 			"get": {
 				"operationId": "Receive",
 				"responses": {
@@ -379,7 +544,14 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/BTCAddress"
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/BTCAddress"
+										},
+										{
+											"$ref": "#/components/schemas/ErrorCodes"
+										}
+									]
 								}
 							}
 						}
@@ -388,15 +560,20 @@
 				"tags": [
 					"wallet"
 				],
-				"security": [
+				"security": [],
+				"parameters": [
 					{
-						"jwt": []
+						"in": "query",
+						"name": "walletId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
 					}
-				],
-				"parameters": []
+				]
 			}
 		},
-		"/send": {
+		"/wallet/send": {
 			"post": {
 				"operationId": "Send",
 				"responses": {
@@ -405,7 +582,14 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/BTCTransaction"
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/BTCTransaction"
+										},
+										{
+											"$ref": "#/components/schemas/ErrorCodes"
+										}
+									]
 								}
 							}
 						}
@@ -414,12 +598,17 @@
 				"tags": [
 					"wallet"
 				],
-				"security": [
+				"security": [],
+				"parameters": [
 					{
-						"jwt": []
+						"in": "query",
+						"name": "walletId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
 					}
 				],
-				"parameters": [],
 				"requestBody": {
 					"required": true,
 					"content": {
@@ -431,16 +620,23 @@
 										"format": "double"
 									},
 									"inscription": {
-										"$ref": "#/components/schemas/Inscription"
+										"anyOf": [
+											{
+												"$ref": "#/components/schemas/Inscription"
+											},
+											{
+												"type": "string"
+											}
+										]
 									},
-									"address": {
+									"addressTo": {
 										"$ref": "#/components/schemas/BTCAddress"
 									}
 								},
 								"required": [
 									"feeRate",
 									"inscription",
-									"address"
+									"addressTo"
 								],
 								"type": "object"
 							}

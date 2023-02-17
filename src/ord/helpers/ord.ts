@@ -20,6 +20,7 @@ export type ordInit = {
     cookiePath: string;
 }
 
+var instances = 0;
 export class Ord {
     private baseCommand: string;
     private commandQueue = new CommandQueue(1);
@@ -27,12 +28,13 @@ export class Ord {
     public get lockStarted() { return this.commandQueue.locked }
 
     constructor(initOptions: ordInit) {
+        console.log(`instances ${++instances}`)
         setInterval(async () => {
             if (this.indexing) return;
             this.indexing = true;
             await this.index()
             this.indexing = false;
-        }, +config.INDEX_ORD_EVERY)
+        }, config.INDEX_ORD_EVERY)
 
         this.baseCommand = [
             initOptions.binaryPath,

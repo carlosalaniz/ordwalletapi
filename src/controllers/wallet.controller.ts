@@ -10,20 +10,26 @@ import {
     UploadedFile,
     Request,
     Body,
-    Security
+    Security,
 } from "tsoa";
 import { WalletCreateMnemonic as WalletMnemonic } from "../ord/helpers/walletCreateNemonic";
 import { BTCWallet } from "../ord/helpers/BTCWallet";
 import { CardinalBalance } from "../ord/helpers/cardinalBalance";
 import { BTCTransactions } from "../ord/helpers/BTCTransactions";
 import { Inscription, InscriptionCreationResult } from "../ord/helpers/inscription";
-import { ErrorMessages } from "../ord/helpers/errorMessages";
 import { BTCAddress } from "../ord/helpers/BTCAddress";
 import { BTCTransaction } from "../ord/helpers/transacation";
+import { OrdBridge } from "../ord/ordBridge";
+import { ErrorCodes } from "../ord/helpers/errorMessages";
+import config from "../config";
+import md5 from 'js-md5';
+import { resolve } from "path";
+import { writeFileSync } from "fs";
+import loadBalancer from "../ord/loadBalancer";
 
 @Tags("wallet")
-@Route("/wallet")
-@Security('api_key')
+@Route("wallet")
+// @Security('api_key')
 export class WalletController extends Controller {
     @Get("status")
     public status() {
@@ -32,53 +38,87 @@ export class WalletController extends Controller {
 
     @Post("create")
     public async create(): Promise<{ walletMnemonic: WalletMnemonic, btcWallet: BTCWallet }> {
-        throw "not implemented"
+        const newWallet = await OrdBridge.create();
+        return { walletMnemonic: newWallet[0], btcWallet: newWallet[1] }
     }
 
     @Post("restore")
     public restore() {
-        throw "not implemented"
+        this.setStatus(501)
+        return "Not Implemented";
     }
 
     @Get("balance")
-    @Security('jwt')
-    public balance(): Promise<CardinalBalance> {
-        throw "not implemented"
+    // @Security('jwt')
+    public async balance(
+        @Query() walletId
+    ): Promise<CardinalBalance | ErrorCodes> {
+        const newWallet = new OrdBridge(walletId);
+        return await newWallet.balance();
     }
 
     @Get("transactions")
-    @Security('jwt')
-    public transactions(): Promise<BTCTransactions[]> {
-        throw "not implemented"
+    // @Security('jwt')
+    public async transactions(
+        @Query() walletId
+    ): Promise<ErrorCodes | BTCTransactions[]> {
+        const bridge = new OrdBridge(walletId);
+        return await bridge.transactions();
     }
 
     @Post("inscribe")
-    @Security('jwt')
-    public inscribe(
+    // @Security('jwt')
+    public async inscribe(
+        @Query() walletId,
         @UploadedFile() file: Express.Multer.File,
         @FormField() dryRun: boolean = false,
         @FormField() feeRate: number,
-        @FormField() satpoint?: string
-    ): Promise<InscriptionCreationResult | ErrorMessages> {
-        throw "not implemented"
+    ): Promise<InscriptionCreationResult | ErrorCodes> {
+        const bridge = new OrdBridge(walletId);
+        // check file
+        let error_messages = [];
+
+        if (file.size > 80000) {
+            error_messages.push(`file size cannot be greater than 80,000 bytes. Actual size ${file.buffer.length}`);
+        }
+
+        const basePath = config.INSCRIPTIONS_IMAGE_FOLDER;
+        const fileName = `${md5(file.buffer)}.${file.originalname.split('.').pop()}`
+        const filePath = resolve(basePath, fileName)
+        // save file.
+        writeFileSync(filePath, file.buffer);
+
+        return await bridge.inscribe(
+            filePath,
+            feeRate,
+            { dryRun }
+        );
     }
 
     @Get("receive")
-    @Security('jwt')
-    public receive(
-    ): Promise<BTCAddress> {
-        throw "not implemented"
+    // @Security('jwt')
+    public async receive(
+        @Query() walletId,
+    ): Promise<BTCAddress | ErrorCodes> {
+        const bridge = new OrdBridge(walletId);
+        return await bridge.receive();
     }
 
     @Post("send")
-    @Security('jwt')
-    public send(
+    // @Security('jwt')
+    public async send(
+        @Query() walletId,
         @Body() body: {
-            address: BTCAddress,
-            inscription: Inscription,
+            addressTo: BTCAddress,
+            inscription: Inscription | string,
             feeRate: number,
         }
-    ): Promise<BTCTransaction> {
-        throw "not implemented"
+    ): Promise<BTCTransaction | ErrorCodes> {
+        const bridge = new OrdBridge(walletId);
+        return await bridge.send(
+            body.addressTo,
+            body.inscription,
+            body.feeRate
+        );
     }
 }

@@ -1,7 +1,7 @@
 import { OrdBridge } from "./ord/ordBridge"
 
 (async () => {
-    // const newWallet = await OrdBridge.create("new_wallet_6")
+    const newWallet = await OrdBridge.create("new_wallet_6")
     const bridge = new OrdBridge({ id: "new_wallet_6" });
     const balance = await bridge.balance();
     const inscriptions = await bridge.inscriptions();
