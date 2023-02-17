@@ -66,6 +66,15 @@ export class WalletController extends Controller {
         return await bridge.transactions();
     }
 
+    @Get("inscriptions")
+    // @Security('jwt')
+    public async inscriptions(
+        @Query() walletId
+    ): Promise<ErrorCodes | Inscription[]> {
+        const bridge = new OrdBridge(walletId);
+        return await bridge.inscriptions();
+    }
+
     @Post("inscribe")
     // @Security('jwt')
     public async inscribe(

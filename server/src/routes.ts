@@ -54,6 +54,16 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Inscription": {
+        "dataType": "refObject",
+        "properties": {
+            "inscription": {"dataType":"string","required":true},
+            "location": {"dataType":"string","required":true},
+            "explorer": {"dataType":"string","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "BTCTransaction": {
         "dataType": "refObject",
         "properties": {
@@ -82,16 +92,6 @@ const models: TsoaRoute.Models = {
         "dataType": "refObject",
         "properties": {
             "address": {"dataType":"string","required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "Inscription": {
-        "dataType": "refObject",
-        "properties": {
-            "inscription": {"dataType":"string","required":true},
-            "location": {"dataType":"string","required":true},
-            "explorer": {"dataType":"string","required":true},
         },
         "additionalProperties": false,
     },
@@ -272,6 +272,31 @@ export function RegisterRoutes(app: Router) {
 
 
               const promise = controller.transactions.apply(controller, validatedArgs as any);
+              promiseHandler(controller, promise, response, undefined, next);
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.get('/wallet/inscriptions',
+            ...(fetchMiddlewares<RequestHandler>(WalletController)),
+            ...(fetchMiddlewares<RequestHandler>(WalletController.prototype.inscriptions)),
+
+            function WalletController_inscriptions(request: any, response: any, next: any) {
+            const args = {
+                    walletId: {"in":"query","name":"walletId","required":true,"dataType":"any"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = getValidatedArgs(args, request, response);
+
+                const controller = new WalletController();
+
+
+              const promise = controller.inscriptions.apply(controller, validatedArgs as any);
               promiseHandler(controller, promise, response, undefined, next);
             } catch (err) {
                 return next(err);

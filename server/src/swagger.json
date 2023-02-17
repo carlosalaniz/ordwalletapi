@@ -74,6 +74,30 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"Inscription": {
+				"description": "Inscription query result",
+				"properties": {
+					"inscription": {
+						"type": "string",
+						"description": "Example: \"bebefd42cf76983bdd24df8dfd565b816a049ef78b1dd5c5797b7be3bb8fd9c1i0\""
+					},
+					"location": {
+						"type": "string",
+						"description": "Example: \"bebefd42cf76983bdd24df8dfd565b816a049ef78b1dd5c5797b7be3bb8fd9c1:0:0\""
+					},
+					"explorer": {
+						"type": "string",
+						"description": "Example: \"https://ordinals.com/inscription/bebefd42cf76983bdd24df8dfd565b816a049ef78b1dd5c5797b7be3bb8fd9c1i0\""
+					}
+				},
+				"required": [
+					"inscription",
+					"location",
+					"explorer"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"BTCTransaction": {
 				"description": "Represents a raw, unsigned bitcoin transactions",
 				"properties": {
@@ -188,30 +212,6 @@
 				},
 				"required": [
 					"address"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Inscription": {
-				"description": "Inscription query result",
-				"properties": {
-					"inscription": {
-						"type": "string",
-						"description": "Example: \"bebefd42cf76983bdd24df8dfd565b816a049ef78b1dd5c5797b7be3bb8fd9c1i0\""
-					},
-					"location": {
-						"type": "string",
-						"description": "Example: \"bebefd42cf76983bdd24df8dfd565b816a049ef78b1dd5c5797b7be3bb8fd9c1:0:0\""
-					},
-					"explorer": {
-						"type": "string",
-						"description": "Example: \"https://ordinals.com/inscription/bebefd42cf76983bdd24df8dfd565b816a049ef78b1dd5c5797b7be3bb8fd9c1i0\""
-					}
-				},
-				"required": [
-					"inscription",
-					"location",
-					"explorer"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -446,6 +446,47 @@
 										{
 											"items": {
 												"$ref": "#/components/schemas/BTCTransactions"
+											},
+											"type": "array"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"wallet"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "walletId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/wallet/inscriptions": {
+			"get": {
+				"operationId": "Inscriptions",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/ErrorCodes"
+										},
+										{
+											"items": {
+												"$ref": "#/components/schemas/Inscription"
 											},
 											"type": "array"
 										}
