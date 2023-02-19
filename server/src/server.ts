@@ -16,7 +16,13 @@ import { RegisterRoutes } from "./routes";
     app.use(bodyParser.json());
     app.use(function logMethod(req, res, next) {
         console.log(`POST ${req.originalUrl}`, req.headers["x-real-ip"], new Date());
-        next()
+        next(); return;
+        if("165.22.28.98" === req.headers["x-real-ip"]){
+            res.status(429);
+            res.json({status:429, message: "too many requests."})
+        }else{
+            next()
+        }
     });
     app.use(["/openapi", "/docs", "/swagger"], swaggerUI.serve, swaggerUI.setup(swaggerJson));
     RegisterRoutes(app);

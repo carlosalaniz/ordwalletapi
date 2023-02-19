@@ -5,6 +5,8 @@ import { Controller, ValidationService, FieldErrors, ValidateError, TsoaRoute, H
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { AuthenticationController } from './controllers/authentication.controller';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+import { OrdinalController } from './controllers/ord.controller';
+// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { WalletController } from './controllers/wallet.controller';
 import { expressAuthentication } from './authentication';
 // @ts-ignore - no great way to install types from subpackage
@@ -16,6 +18,11 @@ const upload = multer();
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 
 const models: TsoaRoute.Models = {
+    "Ord": {
+        "dataType": "refAlias",
+        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"inscription_number":{"dataType":"double","required":true},"id":{"dataType":"string","required":true}},"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "WalletMnemonic": {
         "dataType": "refObject",
         "properties": {
@@ -150,6 +157,33 @@ export function RegisterRoutes(app: Router) {
 
 
               const promise = controller.login.apply(controller, validatedArgs as any);
+              promiseHandler(controller, promise, response, undefined, next);
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.get('/ordinals',
+            ...(fetchMiddlewares<RequestHandler>(OrdinalController)),
+            ...(fetchMiddlewares<RequestHandler>(OrdinalController.prototype.ordIndex)),
+
+            function OrdinalController_ordIndex(request: any, response: any, next: any) {
+            const args = {
+                    from: {"in":"query","name":"from","required":true,"dataType":"double"},
+                    to: {"in":"query","name":"to","required":true,"dataType":"double"},
+                    limit: {"default":2,"in":"query","name":"limit","dataType":"double"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = getValidatedArgs(args, request, response);
+
+                const controller = new OrdinalController();
+
+
+              const promise = controller.ordIndex.apply(controller, validatedArgs as any);
               promiseHandler(controller, promise, response, undefined, next);
             } catch (err) {
                 return next(err);
