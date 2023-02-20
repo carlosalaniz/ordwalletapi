@@ -153,13 +153,12 @@ export class OrdBridge {
      * @param feeRate Use fee rate of <FEE_RATE> sats/vB [default: 1.0]
      * @returns Transaction id in string
      */
-    async send(address: BTCAddress, inscription: Inscription | string, feeRate: number): Promise<BTCTransaction | ErrorCodes> {
+    async send(address: BTCAddress, inscription: string, feeRate: number): Promise<BTCTransaction | ErrorCodes> {
         return await this.checkWalletAndRun(async () => {
-            const id = (inscription instanceof Inscription) ? inscription.inscription : inscription;
             const command = [
                 "--wallet", this.Wallet.id,
                 "wallet", "send",
-                address.address, id,
+                address.address, inscription,
                 "--fee-rate", feeRate
             ].join(" ");
             try {

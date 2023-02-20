@@ -1,11 +1,17 @@
 import config from "./config"
-import express from 'express';
-import * as fs from 'fs';
+import {
+    default as express,
+    Response as ExResponse,
+    Request as ExRequest,
+    NextFunction,
+} from 'express';
 import bodyParser from 'body-parser';
 import * as swaggerUI from "swagger-ui-express";
 import * as swaggerJson from "./swagger.json";
 import cors from 'cors';
 import { RegisterRoutes } from "./routes";
+import { ValidateError } from "tsoa";
+
 
 
 (async () => {
@@ -17,16 +23,37 @@ import { RegisterRoutes } from "./routes";
     app.use(function logMethod(req, res, next) {
         console.log(`POST ${req.originalUrl}`, req.headers["x-real-ip"], new Date());
         next(); return;
-        if("165.22.28.98" === req.headers["x-real-ip"]){
+        if ("165.22.28.98" === req.headers["x-real-ip"]) {
             res.status(429);
-            res.json({status:429, message: "too many requests."})
-        }else{
+            res.json({ status: 429, message: "too many requests." })
+        } else   {
             next()
         }
     });
     app.use(["/openapi", "/docs", "/swagger"], swaggerUI.serve, swaggerUI.setup(swaggerJson));
     RegisterRoutes(app);
-    app.listen(port, "0.0.0.0", async () => {
+    app.use(function errorHandler(
+        err: unknown,
+        req: ExRequest,
+        res: ExResponse,
+        next: NextFunction
+    ): ExResponse | void {
+        if (err instanceof ValidateError) {
+            console.warn(`Caught Validation Error for ${req.path}:`, err.fields);
+            return res.status(422).json({
+                message: "Validation Failed",
+                details: err?.fields,
+            });
+        }
+        if (err instanceof Error) {
+            return res.status(500).json({
+                message: "Internal Server Error",
+            });
+        }
+
+        next();
+    });
+    const server = app.listen(port, "0.0.0.0", async () => {
         console.log("Config:")
         Object.entries(config).forEach(configEntry => {
             if (['string', 'number'].includes(typeof configEntry[1]))
@@ -34,4 +61,5 @@ import { RegisterRoutes } from "./routes";
         })
         console.log(`⚡️[server]: Server is running at http://localhost:${port}/docs/`);
     });
+    server.timeout = 300000;
 })()

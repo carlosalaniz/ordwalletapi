@@ -54,7 +54,11 @@ export class WalletController extends Controller {
         @Query() walletId
     ): Promise<CardinalBalance | ErrorCodes> {
         const newWallet = new OrdBridge(walletId);
-        return await newWallet.balance();
+        const response = await newWallet.balance();
+        if (response.toString() in ErrorCodes) {
+            this.setStatus(400);
+        }
+        return response
     }
 
     @Get("transactions")
@@ -63,7 +67,11 @@ export class WalletController extends Controller {
         @Query() walletId
     ): Promise<ErrorCodes | BTCTransactions[]> {
         const bridge = new OrdBridge(walletId);
-        return await bridge.transactions();
+        const response = await bridge.transactions();
+        if (response.toString() in ErrorCodes) {
+            this.setStatus(400);
+        }
+        return response
     }
 
     @Get("inscriptions")
@@ -72,7 +80,11 @@ export class WalletController extends Controller {
         @Query() walletId
     ): Promise<ErrorCodes | Inscription[]> {
         const bridge = new OrdBridge(walletId);
-        return await bridge.inscriptions();
+        const response = await bridge.inscriptions();
+        if (response.toString() in ErrorCodes) {
+            this.setStatus(400);
+        }
+        return response
     }
 
     @Post("inscribe")
@@ -97,11 +109,15 @@ export class WalletController extends Controller {
         // save file.
         writeFileSync(filePath, file.buffer);
 
-        return await bridge.inscribe(
+        const response = await bridge.inscribe(
             filePath,
             feeRate,
             { dryRun }
         );
+        if (response.toString() in ErrorCodes) {
+            this.setStatus(400);
+        }
+        return response
     }
 
     @Get("receive")
@@ -110,7 +126,11 @@ export class WalletController extends Controller {
         @Query() walletId,
     ): Promise<BTCAddress | ErrorCodes> {
         const bridge = new OrdBridge(walletId);
-        return await bridge.receive();
+        const response = await bridge.receive();
+        if (response.toString() in ErrorCodes) {
+            this.setStatus(400);
+        }
+        return response
     }
 
     @Post("send")
@@ -118,16 +138,20 @@ export class WalletController extends Controller {
     public async send(
         @Query() walletId,
         @Body() body: {
-            addressTo: BTCAddress,
-            inscription: Inscription | string,
+            addressTo: string,
+            inscription: string,
             feeRate: number,
         }
     ): Promise<BTCTransaction | ErrorCodes> {
         const bridge = new OrdBridge(walletId);
-        return await bridge.send(
-            body.addressTo,
+        const response = await bridge.send(
+            { address: body.addressTo },
             body.inscription,
             body.feeRate
         );
+        if (response.toString() in ErrorCodes) {
+            this.setStatus(400);
+        }
+        return response
     }
 }

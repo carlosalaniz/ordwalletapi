@@ -2,18 +2,26 @@
 <script lang="ts">
 import type { PropType } from "vue";
 import Ordpicker from "./Ordpicker.vue"
-import { clients, userState } from "@/client"
+import { userState, reloadState } from "@/client"
+import OrdDetails from "./OrdDetails.vue"
+import LoadAsync from "@/components/LoadAsync.vue"
+import router from "@/router";
 export default {
     data() {
         return {
+            transferring: false,
+            success: undefined,
             userState,
             feeRate: undefined as number | undefined,
             inscription: undefined as string | undefined,
             destAddress: undefined as string | undefined,
+            sendInscription: undefined as undefined | (() => Promise<Response>),
         }
     },
     components: {
-        Ordpicker
+        LoadAsync,
+        Ordpicker,
+        OrdDetails
     },
     props: {
         walletState: Object as PropType<WalletState>
@@ -22,18 +30,24 @@ export default {
         onSelected(ordId: string) {
             this.inscription = ordId;
         },
+        async onSuccess() {
+            await reloadState();
+            router.push("/wallet")
+        },
         async send() {
-            const response = await clients.walletClient(this.userState.token!).send(
-                this.walletState!.id,
-                this.inscription!,
-                this.feeRate!,
-                this.destAddress!
-            )
+            this.sendInscription = async () => {
+                return await userState.walletClient!.send(
+                    this.walletState!.id,
+                    this.inscription!,
+                    this.feeRate!,
+                    this.destAddress!
+                )
+            }
         }
     }
 }
 </script>
-<style>
+<style scoped>
 .no-bottom-margin {
     margin-bottom: 0;
 }
@@ -41,19 +55,21 @@ export default {
 .muted {
     color: #C8C8C8
 }
+
+.disabled {
+    text-decoration: line-through;
+}
 </style>
 <template>
+    <LoadAsync :call="sendInscription" loading-message="Transferring" v-on:success="onSuccess" />
     <div dir="rtl">
-        <a href="#">Send Ordinals</a> | <a disabled class="muted" href="#">Send BTC</a>
+        <a href="#">Send Ordinals</a> | <a data-tooltip="Coming soon" data-placement="bottom" disabled class="disabled secondary" href="#">Send BTC</a>
     </div>
     <hr />
     <summary>
-        <h4 class="no-bottom-margin">Send an ordinal</h4>
+        <h3 class="no-bottom-margin">Send an Ordinal</h3>
     </summary>
-    <blockquote>
-        <!-- <h1></h1> -->
-        <!-- <article style="margin-top: 0;"> -->
-        <!-- <form> -->
+    <article>
         <h4>1: Pick an ordinal from your collection</h4>
         <Ordpicker :available="walletState!.inscriptions!" :onPicked="onSelected" />
         <hr />
@@ -65,7 +81,8 @@ export default {
         <hr />
         <h4>4. Read this.</h4>
         <ul>
-            <li>Check the recipient's Bitcoin address carefully, as transactions are irreversible and if sent to the wrong address cannot be recovered.</li>
+            <li>Check the recipient's Bitcoin address carefully, as transactions are irreversible and if sent to the wrong
+                address cannot be recovered.</li>
             <li>Double-check the inscription you are sending to ensure it is correct.</li>
             <li>Confirm that you have enough Bitcoin in your wallet to cover the transaction and any associated fees.</li>
             <li>Be aware that Bitcoin transactions are not anonymous and can be traced on the blockchain.</li>
@@ -73,7 +90,5 @@ export default {
         <hr />
         <h4>4. Say goodbye ordinal</h4>
         <button @click="send">Bye Bye ord! 🫡</button>
-        <!-- </form> -->
-        <!-- </article> -->
-    </blockquote>
+    </article>
 </template>

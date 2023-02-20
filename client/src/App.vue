@@ -106,6 +106,22 @@ nav .router-link-active {
 .bitcoin-orange {
   color: #f2a900 !important;
 }
+
+.lean-right {
+  text-align: right;
+}
+.top-margin {
+    margin-top:   calc(var(--block-spacing-vertical) + 3.5rem)
+
+}
+</style>
+<style>
+body {
+  min-height: 900px;
+}
+body>main {
+    padding-top: unset !important;
+}
 </style>
 <template>
   <nav class="container">
@@ -154,8 +170,16 @@ nav .router-link-active {
       <span class="message">{{ overlay_message }}</span>
     </div>
   </div>
-
-  <RouterView />
+  
+  <RouterView class="top-margin"  />
+  <div class="container">
+    <footer class="lean-right">
+      <hr>
+      <p>
+        <small>Made with ❤️ in ATX.</small>
+      </p>
+    </footer>
+  </div>
 </template>
 <script lang="ts">
 import { userState } from "./client";
@@ -176,7 +200,6 @@ export default {
       if (!newToken) {
         this.showMessageFor("Your session timed out, please login again.", 5000)
         router.push("/");
-
       }
     }
   },

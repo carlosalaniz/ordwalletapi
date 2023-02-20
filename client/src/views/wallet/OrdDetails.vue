@@ -6,9 +6,11 @@ import { loadOrdinalData } from '@/client';
 export default {
     async mounted() {
         this.ordData = await loadOrdinalData(this.ordId!);
+        this.loading = false;
     },
     data() {
         return {
+            loading: true,
             ordData: {
                 number: null as string | null,
                 contentLength: null as string | null,
@@ -27,7 +29,7 @@ export default {
     methods: {}
 }
 </script>
-<style>
+<style scoped>
 .no-bottom-margin {
     margin-bottom: 0;
     position: relative;
@@ -39,6 +41,10 @@ export default {
 }
 
 @media (min-width:992px) {
+    body {
+        color: red !important
+    }
+
     .top-margin {
         padding-top: calc(var(--font-size) + var(--typography-spacing-vertical))
     }
@@ -60,13 +66,14 @@ export default {
     overflow: hidden;
 
 }
+
 </style>
 <template>
     <div class="grid" style="margin: 0 auto ;">
         <section class="no-bottom-margin">
-            <h2 class="no-bottom-margin"> Inscription #{{ ordData.number}}:</h2>
-            <blockquote>
-                <p>
+            <h2 class="no-bottom-margin"> #{{ ordData.number }}</h2>
+            <blockquote :aria-busy="loading">
+                <p v-if="!loading">
                     <b>Content length:</b>
                     <br />
                     {{ ordData.contentLength }}
@@ -89,12 +96,12 @@ export default {
                 </p>
             </blockquote>
         </section>
-        <section class="">
+        <section class="top-margin">
             <div id="wrap">
                 <!-- <iframe sandbox="allow-scripts" id="frame" scrolling="no" loading="lazy" :src="`https://ordinals.com/preview/${ordId}`"></iframe> -->
-                <object id="frame" :data="`https://ordinals.com/preview/${ordId}`" type="text/html">
-                    Alternative Content
-                </object>
+                <iframe id="frame" :src="`https://ordinals.com/preview/${ordId}`" scrolling="no" >
+                    <span :aria-busy="loading"></span>
+                </iframe>
             </div>
             <hr v-if="actionText" />
             <button v-if="actionText" class="secondary no-bottom-margin" @click="$emit('actionActivated', ordId)">{{ actionText }}</button>

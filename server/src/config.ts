@@ -18,7 +18,7 @@ class Config {
     #BTC_NODES: BTC_NODES_CONFIG[] = null;
     get BTC_NODES() {
         if (this.#BTC_NODES) return this.#BTC_NODES;
-        const value = process.env.BTC_NODES ?? "http://192.168.1.34:8332;/home/user/carlos.cookie"
+        const value = process.env.BTC_NODES ?? "http://192.168.1.11:8332;/home/user/carlos.cookie"
         const nodesConfig: BTC_NODES_CONFIG[] = value.split(",").map(v => {
             const btc_node_paths = v.split(";");
             return {

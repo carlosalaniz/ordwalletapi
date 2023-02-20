@@ -106,7 +106,7 @@ th {
             </div>
         </article>
     </div>
-    <h1>Inscriptions:</h1>
+    <h3>Inscriptions:</h3>
     <hr />
     <div v-for="inscription in walletState?.inscriptions">
         <OrdDetails :ordId="inscription" />

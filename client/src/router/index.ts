@@ -2,10 +2,11 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import WalletView from '../views/WalletView.vue'
 import WalletHomeView from '../views/wallet/HomeWallet.vue'
-import WalletDepositView from '../views/wallet/Deposit.vue'
 import WalletInscribeView from '../views/wallet/Inscribe.vue'
 import WalletReceiveView from '../views/wallet/Receive.vue'
 import WalletSendView from '../views/wallet/Send.vue'
+import RegisterView from "../views/auth/register.vue"
+import LoginView from "../views/auth/login.vue"
 
 import { userState } from "../client";
 
@@ -16,6 +17,16 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: HomeView
+    },
+    {
+      path: '/register',
+      name: 'register',
+      component: RegisterView
+    },
+    {
+      path: '/login',
+      name: 'login',
+      component: LoginView
     },
     {
       path: '/wallet',
@@ -37,14 +48,6 @@ const router = createRouter({
           path: "inscribe",
           name: "Inscribe",
           component: WalletInscribeView,
-          props: {
-            walletState: userState.wallets.at(0)
-          }
-        },
-        {
-          path: "deposit",
-          name: "Deposit",
-          component: WalletDepositView,
           props: {
             walletState: userState.wallets.at(0)
           }

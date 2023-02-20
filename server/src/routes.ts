@@ -398,7 +398,7 @@ export function RegisterRoutes(app: Router) {
             function WalletController_send(request: any, response: any, next: any) {
             const args = {
                     walletId: {"in":"query","name":"walletId","required":true,"dataType":"any"},
-                    body: {"in":"body","name":"body","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"feeRate":{"dataType":"double","required":true},"inscription":{"dataType":"union","subSchemas":[{"ref":"Inscription"},{"dataType":"string"}],"required":true},"addressTo":{"ref":"BTCAddress","required":true}}},
+                    body: {"in":"body","name":"body","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"feeRate":{"dataType":"double","required":true},"inscription":{"dataType":"string","required":true},"addressTo":{"dataType":"string","required":true}}},
             };
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa

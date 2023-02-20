@@ -26,7 +26,7 @@ export default {
     }
 }
 </script>
-<style>
+<style scoped>
 .no-bottom-margin {
     margin-bottom: 0;
     position: relative;
@@ -81,10 +81,6 @@ export default {
     max-height: 90%;
     min-width: 75%;
     position: relative;
-}
-
-.top-margin {
-    padding-top: calc(var(--font-size) + var(--typography-spacing-vertical))
 }
 
 .fixed-dialog-header {

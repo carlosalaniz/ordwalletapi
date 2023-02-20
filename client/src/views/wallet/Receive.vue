@@ -16,9 +16,9 @@ export default {
 }
 </script>
 <template>
-    <h5>Receive funds</h5>
+    <h3>Receive Funds or Inscriptions</h3>
     <p>
-        Use the address bellow to send funds to this wallet.
+        Use the address below to receive funds or inscriptions in this wallet.
     </p>
     <p>
         Remember, Bitcoin transactions are irreversible, so it's important to double-check your Bitcoin address before sharing it with others. Also, keep in mind that Bitcoin transaction fees may apply, which can affect the amount of Bitcoin you receive.

@@ -44,6 +44,14 @@ export default {
     .hide_wide {
         display: none;
     }
+    .no_decorate *{
+        text-decoration: none !important;
+    }
+}
+@media (max-height: 850px) {
+    .hide-short {
+        display: none;
+    }
 }
 </style>
 <template>
@@ -54,7 +62,7 @@ export default {
             </span>
             <div class="side_menu show_wide">
                 <SideMenu :menu="menu" />
-                <blockquote>
+                <blockquote class="hide-short no_decorate">
                     <p>
                         Balance
                         <br />

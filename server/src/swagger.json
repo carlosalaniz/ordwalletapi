@@ -742,17 +742,10 @@
 										"format": "double"
 									},
 									"inscription": {
-										"anyOf": [
-											{
-												"$ref": "#/components/schemas/Inscription"
-											},
-											{
-												"type": "string"
-											}
-										]
+										"type": "string"
 									},
 									"addressTo": {
-										"$ref": "#/components/schemas/BTCAddress"
+										"type": "string"
 									}
 								},
 								"required": [

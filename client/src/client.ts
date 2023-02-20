@@ -13,15 +13,24 @@ declare global {
         addresses: string[],
         inscriptions: string[]
     }
+
     type UserState = {
         token?: string,
         walletClient?: WalletApi
-        authClient?: any,
+        authClient?: AuthApi,
         info: {
             username: string,
             exp: number
         }
-        wallets: WalletState[]
+        wallets: WalletState[],
+        lastFeeUpdate: Date,
+        fees: {
+            fastestFee?: number,
+            halfHourFee?: number,
+            hourFee?: number,
+            economyFee?: number,
+            minimumFee?: number
+        }
     }
 
     interface IFetchClient {
@@ -47,9 +56,7 @@ declare global {
 
 
 class FetchClient implements IFetchClient {
-    private jwt?: string
-    constructor(private host: string, private token?: string) {
-        this.jwt = host;
+    constructor(private host: string, private jwt?: string) {
     }
 
     headers(headers: { [k: string]: string } = {}) {
@@ -92,9 +99,10 @@ class FetchClient implements IFetchClient {
         const url = this.host + resource + this.queryString(opt?.queryParameters);
         const headers = (this.jwt ? this.userHeaders : this.headers)
         return await fetch(url, {
+            method: "POST",
             headers: {
                 'Content-Type': 'application/json',
-                ...headers(opt?.headers)
+                ...(this.jwt ? this.userHeaders(opt?.queryParameters) : this.headers(opt?.queryParameters))
             },
             body: opt?.body && JSON.stringify(opt?.body)
         })
@@ -149,7 +157,7 @@ class WalletApi {
     async create() {
         return await this.client
             .postJson(this.endpoints.wallet.create)
-            .then(r => r.json())
+
     };
 
     async restore() {
@@ -164,7 +172,7 @@ class WalletApi {
                     walletId: walletId
                 }
             }
-        ).then(r => r.json())
+        )
     };
 
     async transactions(walletId: string) {
@@ -175,7 +183,7 @@ class WalletApi {
                     walletId: walletId
                 }
             }
-        ).then(r => r.json())
+        )
     };
 
     async inscriptions(walletId: string) {
@@ -186,7 +194,7 @@ class WalletApi {
                     walletId: walletId
                 }
             }
-        ).then(r => r.json())
+        )
     };
 
     async inscribe(
@@ -210,7 +218,7 @@ class WalletApi {
                     feeRate: Math.round(feeRate).toString()
                 }
             }
-        ).then(r => r.json())
+        )
     };
 
     async receive(walletId: string) {
@@ -221,7 +229,7 @@ class WalletApi {
                     walletId: walletId
                 }
             }
-        ).then(r => r.json())
+        )
     };
 
     async send(
@@ -231,33 +239,57 @@ class WalletApi {
         addressTo: string
     ) {
         return await this.client.postJson(
-            this.endpoints.wallet.inscriptions,
+            this.endpoints.wallet.send,
             {
                 queryParameters: {
                     walletId: walletId
                 },
                 body: {
                     feeRate: Math.round(feeRate),
-                    inscription: {
-                        inscription
-                    },
-                    addressTo: {
-                        address: addressTo
-                    }
+                    inscription,
+                    addressTo
                 }
             }
-        ).then(r => r.json())
+        )
     };
 
     async wallets() {
         return await this.client
             .postJson(this.endpoints.wallet.wallets)
-            .then(r => r.json())
+
     }
 }
 
+class AuthApi {
+    constructor(private client: FetchClient) { }
+    endpoints = {
+        register: "/authentication/register",
+        login: "/authentication/login"
+
+    };
+    async login(username: string, password: string) {
+        return await this.client.postJson(this.endpoints.login, {
+            body: {
+                username, password
+            }
+        })
+    };
+    async register(userData: {
+        username: string,
+        password: string,
+        // passphrase: string
+    }) {
+        return await this.client.postJson(this.endpoints.register, {
+            body: {
+                ...userData
+            }
+        })
+    }
+}
+
+
 const configuration = {
-    walletAPIHost: "https://experimental.extraordinal.net/",
+    walletAPIHost: "https://experimental.extraordinal.net",
     ordinalHost: "https://ordinals.com/",
     mempool: {
         host: "mempool.space",
@@ -266,36 +298,6 @@ const configuration = {
 }
 
 class Client {
-    // TODO: add types.
-    private authenticationApi = (client: IFetchClient) => {
-        return {
-            client,
-            endpoints: {
-                register: "/authentication/register",
-                login: "/authentication/login"
-
-            },
-            async login(username: string, password: string) {
-                return await this.client.postJson(this.endpoints.login, {
-                    body: {
-                        username, password
-                    }
-                }).then(r => r.json())
-            },
-            async register(userData: {
-                username: string,
-                password: string,
-                passphrase: string
-            }) {
-                return await this.client.postJson(this.endpoints.register, {
-                    body: {
-                        ...userData
-                    }
-                }).then(r => r.json())
-            }
-        }
-    }
-
     public walletClient(token: string) {
         const client = new FetchClient(configuration.walletAPIHost, token);
         return new WalletApi(client);
@@ -303,13 +305,12 @@ class Client {
 
     public AuthClient() {
         const client = new FetchClient(configuration.walletAPIHost);
-        return this.authenticationApi(client);
+        return new AuthApi(client);
     }
 
     public mempoolApi = null;
 
 }
-
 
 const client = new Client();
 
@@ -330,8 +331,9 @@ export const reloadState = async () => {
     // Init session.
     console.debug("initializing state...")
     const token = localStorage.getItem("token");
-    userState.authClient = client.AuthClient();
     if (token) {
+        userState.authClient = client.AuthClient();
+        userState.walletClient = client.walletClient(token);
         console.debug("token found...")
         userState.info = jwt_decode(token);
         if (userState.info.exp < Date.now()) {
@@ -342,27 +344,31 @@ export const reloadState = async () => {
         }
         userState.token = token;
         userState.walletClient = client.walletClient(token);
-        userState.wallets = await userState.walletClient.wallets();
+        userState.wallets = await userState.walletClient.wallets().then(r => r.json());
     } else {
         console.debug("token not found...")
     }
 }
 
-export const clients = {
-    authClient: client.AuthClient(),
-    walletClient: client.walletClient
-};
 
 export const userState = reactive({
-    walletClient: undefined,
-    authClient: null,
-    token: "sdf",
+    lastFeeUpdate: new Date(),
+    fees: {
+        fastestFee: undefined,
+        halfHourFee: undefined,
+        hourFee: undefined,
+        economyFee: undefined,
+        minimumFee: undefined
+    },
+    walletClient: client.walletClient("token"),
+    authClient: client.AuthClient(),
+    token: "sdfsfsd",
     info: {
         username: "carlos",
         exp: 0
     },
     wallets: [{
-        id: "0aaf5d5a-9245-4507-b548-2aa0912c0a40",
+        id: "4b9cb0a6-f9ca-4411-b865-bc9bf68ecbd3",
         balance: 4646,
         transactions: [
             "9e32dc186f42cae7813845dee50221d47a406686ffaf51126501bb8642d52845",
@@ -378,4 +384,30 @@ export const userState = reactive({
         ]
     }]
 } as UserState);
+
+export async function wait(ms: number) {
+    await new Promise((r) => setTimeout(() => r(1), ms));
+}
+
+export const errorMessages = {
+    NOT_ENOUGH_CARDINAL: "You don't have enough cardinal in your wallet to perform this operation, please add more funds and try again.",
+    INSCRIPTION_NOT_IN_WALLET: "oops... you don't seem to own that inscription!"
+} as { [key: string]: string };
+
+async function watchers() {
+    await Promise.all([
+        (async () => {
+            while (true) {
+                // mempool estimate watcher
+                userState.fees = await
+                    fetch("https://" + configuration.mempool.host + "/api/v1/fees/recommended")
+                        .then(r => r.json())
+                userState.lastFeeUpdate = new Date()
+                // 1 minute
+                await wait(60000);
+            }
+        })()
+    ])
+}
+watchers()
 reloadState();

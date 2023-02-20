@@ -13,6 +13,7 @@
   "dependencies": {
     "@mempool/mempool.js": "^2.3.0",
     "@picocss/pico": "^1.5.7",
+    "deep-equal": "^2.2.0",
     "jwt-decode": "^3.1.2",
     "qrcode.vue": "^3.3.3",
     "vue": "^3.2.45",
@@ -20,6 +21,7 @@
   },
   "devDependencies": {
     "@rushstack/eslint-patch": "^1.1.4",
+    "@types/deep-equal": "^1.0.1",
     "@types/node": "^18.11.12",
     "@vitejs/plugin-vue": "^4.0.0",
     "@vue/eslint-config-prettier": "^7.0.0",
