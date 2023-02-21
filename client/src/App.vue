@@ -156,14 +156,14 @@ body>main {
       <li>
         <a href="#" disabled data-tooltip="Coming soon" data-placement="bottom" class="secondary">Marketplace</a>
       </li>
-      <li class="">|</li>
-      <li class="">
-        <a href="#" target="_blank" class="contrast">
+      <li class="wide_only">|</li>
+      <li class="wide_only">
+        <a href="https://twitter.com/extra_ordinal" target="_blank" class="contrast">
           <IconTwitter />
         </a>
       </li>
-      <li class="">
-        <a href="#" target="_blank" class="contrast">
+      <li class="wide_only">
+        <a href="https://discord.gg/CpjqQe4X" target="_blank" class="contrast">
           <IconDiscord />
         </a>
       </li>
@@ -178,9 +178,11 @@ body>main {
   <RouterView class="top-margin" />
   <div class="container">
     <footer class="lean-right">
+
       <hr>
+
       <p>
-        <small>Made with ❤️ in ATX.</small>
+        <small><a href="https://discord.gg/CpjqQe4X" target="_blank">Discord</a> / <a href="https://twitter.com/extra_ordinal" target="_blank">Twitter</a></small> [ Made with ❤️ in ATX ]
       </p>
     </footer>
   </div>

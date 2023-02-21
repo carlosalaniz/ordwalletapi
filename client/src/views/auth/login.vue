@@ -20,7 +20,6 @@ export default {
     },
     methods: {
         async onSuccess(data: any) {
-            debugger;
             await reloadState(data.token);
             router.push("/wallet")
         },
@@ -39,7 +38,7 @@ export default {
 <template>
     <div class="container">
         <h1>Login</h1>
-        <LoadAsync :call="login" @success="onSuccess" loading-message="Authneticating" />
+        <LoadAsync :call="login" @success="onSuccess" loading-message="Authenticating" />
         <article>
             <div>
                 Email

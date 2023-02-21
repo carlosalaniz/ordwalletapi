@@ -21,7 +21,6 @@ export default {
     },
     methods: {
         async onSuccess(data: { mnemonic: string, token: string }) {
-            debugger;
             await reloadState(data.token);
             this.mnemonic = data.mnemonic.split(" ");
         },

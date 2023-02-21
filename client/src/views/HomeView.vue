@@ -28,14 +28,18 @@ export default {
             <DeleteAndType :messages="messages" :show-for="2000" /> Inscriptions
         </h1>
         <div class="grid" v-if="!userState.token">
-            <RouterLink role="button" class="secondary" to="/register">Register</RouterLink>
-            <!-- <button class="secondary">Register</button> -->
-            <RouterLink role="button" class="contrast" to="/login">Login</RouterLink>
+            <section>
+                <RouterLink to="/register"><button class="secondary">Register</button></RouterLink>
+            </section>
+            <section>
+                <!-- <button class="secondary">Register</button> -->
+                <RouterLink class="contrast" to="/login"><button class="contrast">Login</button></RouterLink>
+            </section>
         </div>
         <article>
             Your all-in-one wallet for inscribing, storing, viewing, and trading inscriptions. View your balances,
             transactions, and inscriptions in the dashboard, or easily send/receive inscriptions to any wallet that supports coin management.
-            To get started, register above.
+            <span v-if="!userState.token">To get started, register above.</span>
         </article>
     </div>
 </template>

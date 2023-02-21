@@ -62,13 +62,19 @@ export class Ord {
      */
     async runCommand<T>(command): Promise<T | null> {
         const fullCommand = [this.baseCommand, command].join(" ");
+        var out = null;
         try {
             const stdout = await this.commandQueue.execute(fullCommand)
+            out = stdout;
             logger.debug(stdout);
             if (stdout?.length > 0)
                 return JSON.parse(stdout)
         } catch (error) {
-            // console.log(error);
+            if (error instanceof SyntaxError) {
+                logger.debug(error);
+                if (out) return out;
+                return null
+            }
             throw error;
         }
     }

@@ -75,7 +75,6 @@ router.beforeEach((to, from) => {
   if (
     !userState.token
     && !GuestRoutes.includes(name!)) {
-    debugger;
     router.push("/")
     return false;
   }
