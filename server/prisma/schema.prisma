@@ -11,27 +11,38 @@ datasource db {
 }
 
 model Users {
-  id           String         @id @default(uuid())
-  username     String         @unique
+  id           String    @id @default(uuid())
+  username     String    @unique
   passowrd     String
-  wallet       Wallets        @relation(fields: [walletId], references: [id])
-  inscriptions Inscriptions[]
-
-  walletId String @unique
+  createdAt    DateTime  @default(now())
+  lastLoggedIn DateTime  @default(now())
+  lastActivity DateTime  @default(now())
+  wallet       Wallets[]
 }
 
 model Wallets {
-  id     String  @id @default(uuid())
-  backup String?
-  User   Users?
+  id               String       @id
+  addresses        BTCAddress[]
+  menemonic        String?
+  User             Users?       @relation(fields: [usersId], references: [id])
+  lastKnownBalance Int?
+  usersId          String?      @unique
+}
+
+model BTCAddress {
+  address      String         @id @unique
+  Wallets      Wallets?       @relation(fields: [walletsId], references: [id])
+  Inscriptions Inscriptions[]
+  walletsId    String?
+  createdAt    DateTime       @default(now())
 }
 
 model Inscriptions {
-  id            Int      @id @default(autoincrement())
-  inscriptionId String   @unique
-  timestamp     DateTime
-  currentOwner  Users?   @relation(fields: [userId], references: [id])
-  userId        String
+  id                Int         @id @default(autoincrement())
+  inscriptionId     String      @unique
+  timestamp         DateTime
+  Address           BTCAddress? @relation(fields: [bTCAddressAddress], references: [address])
+  bTCAddressAddress String?
 }
 
 model Ord {

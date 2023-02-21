@@ -3,11 +3,14 @@ import MobileMenu from '../components/MobileMenu.vue';
 import SideMenu from '../components/SideMenu.vue';
 import Estimates from '../components/Estimates.vue';
 import type { PropType } from 'vue';
+import { userState } from "@/client"
+
 </script>
 <script lang="ts">
 export default {
     data() {
         return {
+            userState: userState as UserState,
             menu: [
                 { route: "/wallet", text: "Dashboard" },
                 { route: "/wallet/inscribe", text: "Inscribe" },
@@ -15,9 +18,6 @@ export default {
                 { route: "/wallet/receive", text: "Receive" }
             ]
         }
-    },
-    props: {
-        walletState: Object as PropType<WalletState>
     }
 }
 </script>
@@ -44,10 +44,12 @@ export default {
     .hide_wide {
         display: none;
     }
-    .no_decorate *{
+
+    .no_decorate * {
         text-decoration: none !important;
     }
 }
+
 @media (max-height: 850px) {
     .hide-short {
         display: none;
@@ -66,17 +68,20 @@ export default {
                     <p>
                         Balance
                         <br />
-                        <RouterLink to="/wallet#balance">{{ walletState?.balance }}</RouterLink>
+                        <RouterLink to="/wallet#balance" 
+                        :data-tooltip='`~${(userState.SatToUSD * (userState.wallets?.at(0)?.balance || 0)).toFixed(2)} USD`' 
+                        data-placement="top"
+                        >{{ userState.wallets?.at(0)?.balance }}</RouterLink>
                     </p>
                     <p>
                         Inscriptions in wallet
                         <br />
-                        <RouterLink to="/wallet#ords">{{ walletState?.inscriptions.length }}</RouterLink>
+                        <RouterLink to="/wallet#ords">{{ userState.wallets?.at(0)?.inscriptions.length }}</RouterLink>
                     </p>
                     <p>
                         Pending transactions
                         <br />
-                        <RouterLink to="/wallet#transactions">{{ walletState?.transactions.length }}</RouterLink>
+                        <RouterLink to="/wallet#transactions">{{ userState.wallets?.at(0)?.transactions.length }}</RouterLink>
                     </p>
                 </blockquote>
             </div>

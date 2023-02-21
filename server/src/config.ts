@@ -9,10 +9,16 @@ type ORD_BINARY_PATHS = {
     data_path: string;
     binary_path: string;
 }
-
+import { PrismaClient } from '@prisma/client'
+const prisma = new PrismaClient()
 class Config {
+    // prisma client
+    get prisma() {
+        return prisma;
+    }
+
     // secret to sign jwt
-    JWT_SIGNING_SECRET: "";
+    JWT_SIGNING_SECRET = "sdf";
 
     // comma separated rpc nodes to connect to. Format {address};{cookieFilePath}
     #BTC_NODES: BTC_NODES_CONFIG[] = null;
@@ -66,7 +72,5 @@ class Config {
     get INSCRIPTIONS_IMAGE_FOLDER() {
         return process.env.INSCRIPTIONS_IMAGE_FOLDER ?? "/home/user/inscriptions/"; // once every hour.
     };
-
-
 }
 export default new Config()

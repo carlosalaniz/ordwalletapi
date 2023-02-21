@@ -20,13 +20,14 @@ export default {
     },
     methods: {
         async onSuccess(data: any) {
-            localStorage.setItem("token", data);
-            await reloadState();
+            debugger;
+            await reloadState(data.token);
             router.push("/wallet")
         },
         doLogin() {
             this.login = async () => {
-                return await userState.authClient!.login(
+                //@ts-ignore
+                return await userState.authClient?.login(
                     this.username,
                     this.password
                 )
@@ -38,7 +39,7 @@ export default {
 <template>
     <div class="container">
         <h1>Login</h1>
-        <LoadAsync :call="login" v-on-success="onSuccess" loading-message="Authneticating" />
+        <LoadAsync :call="login" @success="onSuccess" loading-message="Authneticating" />
         <article>
             <div>
                 Email

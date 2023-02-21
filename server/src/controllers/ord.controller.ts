@@ -1,5 +1,6 @@
 import { Tags, Route, Security, Controller, Post, Body, Get, Query } from "tsoa";
 import { PrismaClient } from '@prisma/client'
+import { estimateCost } from "../tooling/utils";
 const prisma = new PrismaClient()
 @Tags("ord")
 @Route("/ordinals")

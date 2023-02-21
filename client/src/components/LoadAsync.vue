@@ -8,8 +8,6 @@ export default {
     emits: ["success", "warning", "error"],
     props: {
         call: Object as PropType<() => Promise<Response>>,
-        onSuccess: Object as PropType<undefined | (() => Promise<Response>)>,
-        onError: Object as PropType<undefined | (() => Promise<Response>)>,
         loadingMessage: String,
         successMessage: String,
         warningMessage: String,
@@ -110,19 +108,22 @@ export default {
 }
 </style>
 <template>
-    <div class="float-top" v-if="state" :class="{
-        error: 'error' == state,
-        warning: 'warning' == state,
-        success: 'success' == state
-    }">
-        {{ message() }}
+    <div>
+
+        <div class="float-top" v-if="state" :class="{
+            error: 'error' == state,
+            warning: 'warning' == state,
+            success: 'success' == state
+        }">
+            {{ message() }}
+        </div>
+        <dialog :open="loading">
+            <article>
+                {{ loadingMessage }}...
+                <br />
+                <progress></progress>
+                Hang tight this might take a few.
+            </article>
+        </dialog>
     </div>
-    <dialog :open="loading">
-        <article>
-            {{ loadingMessage }}...
-            <br />
-            <progress></progress>
-            Hang tight this might take a few.
-        </article>
-    </dialog>
 </template>

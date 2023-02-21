@@ -11,6 +11,7 @@ import {
     Request,
     Body,
     Security,
+    Middlewares,
 } from "tsoa";
 import { WalletCreateMnemonic as WalletMnemonic } from "../ord/helpers/walletCreateNemonic";
 import { BTCWallet } from "../ord/helpers/BTCWallet";
@@ -26,6 +27,10 @@ import md5 from 'js-md5';
 import { resolve } from "path";
 import { writeFileSync } from "fs";
 import loadBalancer from "../ord/loadBalancer";
+import { WalletBelongsToUser } from "../middleware/walletBelongsToUser";
+import { loadUserData, walletData } from "../tooling/utils";
+import { AuthenticatedRequest } from "../authentication";
+import { randomUUID } from "crypto";
 
 @Tags("wallet")
 @Route("wallet")
@@ -37,19 +42,26 @@ export class WalletController extends Controller {
     }
 
     @Post("create")
-    public async create(): Promise<{ walletMnemonic: WalletMnemonic, btcWallet: BTCWallet }> {
+    @Security('jwt')
+    public async create(): Promise<
+        { walletMnemonic: WalletMnemonic, btcWallet: BTCWallet } | ErrorCodes
+    > {
+        this.setStatus(405)
+        return ErrorCodes.NOT_ALLOWED;
         const newWallet = await OrdBridge.create();
         return { walletMnemonic: newWallet[0], btcWallet: newWallet[1] }
     }
 
     @Post("restore")
+    @Security('jwt')
     public restore() {
         this.setStatus(501)
         return "Not Implemented";
     }
 
     @Get("balance")
-    // @Security('jwt')
+    @Security('jwt')
+    @Middlewares([WalletBelongsToUser])
     public async balance(
         @Query() walletId
     ): Promise<CardinalBalance | ErrorCodes> {
@@ -62,7 +74,8 @@ export class WalletController extends Controller {
     }
 
     @Get("transactions")
-    // @Security('jwt')
+    @Security('jwt')
+    @Middlewares([WalletBelongsToUser])
     public async transactions(
         @Query() walletId
     ): Promise<ErrorCodes | BTCTransactions[]> {
@@ -75,7 +88,8 @@ export class WalletController extends Controller {
     }
 
     @Get("inscriptions")
-    // @Security('jwt')
+    @Security('jwt')
+    @Middlewares([WalletBelongsToUser])
     public async inscriptions(
         @Query() walletId
     ): Promise<ErrorCodes | Inscription[]> {
@@ -88,7 +102,8 @@ export class WalletController extends Controller {
     }
 
     @Post("inscribe")
-    // @Security('jwt')
+    @Security('jwt')
+    @Middlewares([WalletBelongsToUser])
     public async inscribe(
         @Query() walletId,
         @UploadedFile() file: Express.Multer.File,
@@ -104,7 +119,7 @@ export class WalletController extends Controller {
         }
 
         const basePath = config.INSCRIPTIONS_IMAGE_FOLDER;
-        const fileName = `${md5(file.buffer)}.${file.originalname.split('.').pop()}`
+        const fileName = `${randomUUID()}.${file.originalname.split('.').pop()}`
         const filePath = resolve(basePath, fileName)
         // save file.
         writeFileSync(filePath, file.buffer);
@@ -121,7 +136,8 @@ export class WalletController extends Controller {
     }
 
     @Get("receive")
-    // @Security('jwt')
+    @Security('jwt')
+    @Middlewares([WalletBelongsToUser])
     public async receive(
         @Query() walletId,
     ): Promise<BTCAddress | ErrorCodes> {
@@ -129,12 +145,20 @@ export class WalletController extends Controller {
         const response = await bridge.receive();
         if (response.toString() in ErrorCodes) {
             this.setStatus(400);
+            return response;
         }
+        await config.prisma.bTCAddress.create({
+            data: {
+                address: (response as BTCAddress).address,
+                walletsId: walletId
+            }
+        })
         return response
     }
 
     @Post("send")
-    // @Security('jwt')
+    @Security('jwt')
+    @Middlewares([WalletBelongsToUser])
     public async send(
         @Query() walletId,
         @Body() body: {
@@ -153,5 +177,16 @@ export class WalletController extends Controller {
             this.setStatus(400);
         }
         return response
+    }
+
+
+    @Post("data")
+    @Security('jwt')
+    @Middlewares([WalletBelongsToUser])
+    public async getWalletData(
+        @Query() walletId,
+        @Request() request: AuthenticatedRequest,
+    ) {
+        return await loadUserData(request.user.id)
     }
 }

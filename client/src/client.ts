@@ -9,22 +9,24 @@ declare global {
     interface WalletState {
         id: string,
         balance: number,
-        transactions: string[],
+        transactions: { transaction: string, confirmations: number }[],
         addresses: string[],
         inscriptions: string[]
     }
 
     type UserState = {
+        SatToUSD: number,
+        reloading: boolean,
         token?: string,
         walletClient?: WalletApi
         authClient?: AuthApi,
-        info: {
+        info?: {
             username: string,
             exp: number
         }
-        wallets: WalletState[],
-        lastFeeUpdate: Date,
-        fees: {
+        wallets?: WalletState[],
+        lastFeeUpdate?: Date,
+        fees?: {
             fastestFee?: number,
             halfHourFee?: number,
             hourFee?: number,
@@ -70,7 +72,7 @@ class FetchClient implements IFetchClient {
         if (!this.jwt) throw "No user token defined."
         // this headers should be added to all authorized requests 
         return {
-            Authorization: `Bearer ${this.jwt}`,
+            Authorization: `${this.jwt}`,
             ...this.headers(headers),
         }
     };
@@ -86,28 +88,25 @@ class FetchClient implements IFetchClient {
         resource: string,
         opt?: fetchOptions
     ) {
-        const url = this.host + resource + this.queryString(opt?.queryParameters);
-        const headers = (this.jwt ? this.userHeaders : this.headers)
+        const url = this.host + resource + (this.queryString(opt?.queryParameters) ?? "");
         return await fetch(url, {
-            headers: headers(opt?.headers)
+            headers: (this.jwt ? this.userHeaders(opt?.headers) : this.headers(opt?.headers)),
         })
     };
 
     async postJson(resource: string, opt?: fetchOptions & {
         body?: Object
     }) {
-        const url = this.host + resource + this.queryString(opt?.queryParameters);
-        const headers = (this.jwt ? this.userHeaders : this.headers)
+        const url = this.host + resource + (this.queryString(opt?.queryParameters) ?? "");
         return await fetch(url, {
             method: "POST",
             headers: {
                 'Content-Type': 'application/json',
-                ...(this.jwt ? this.userHeaders(opt?.queryParameters) : this.headers(opt?.queryParameters))
+                ...(this.jwt ? this.userHeaders(opt?.headers) : this.headers(opt?.headers))
             },
             body: opt?.body && JSON.stringify(opt?.body)
         })
     };
-
     async postFormData(
         resource: string,
         opt: fetchOptions & {
@@ -119,7 +118,7 @@ class FetchClient implements IFetchClient {
             }
         }
     ) {
-        const url = this.host + resource + this.queryString(opt?.queryParameters);
+        const url = this.host + resource + (this.queryString(opt?.queryParameters) ?? "");
 
         var data = Object.entries(opt.formData).reduce((formData, [key, value]) => {
             if (typeof value === "string") {
@@ -129,10 +128,9 @@ class FetchClient implements IFetchClient {
             }
             return formData;
         }, new FormData())
-        const headers = (this.jwt ? this.userHeaders : this.headers)
         return await fetch(url, {
             method: 'POST',
-            headers: headers(opt.headers),
+            headers: (this.jwt ? this.userHeaders(opt?.headers) : this.headers(opt?.headers)),
             body: data
         })
     }
@@ -148,6 +146,7 @@ class WalletApi {
             balance: "/wallet/balance",
             transactions: "/wallet/transactions",
             inscriptions: "/wallet/inscriptions",
+            data: "/wallet/data",
             inscribe: "/wallet/inscribe",
             receive: "/wallet/receive",
             send: "/wallet/send",
@@ -197,6 +196,17 @@ class WalletApi {
         )
     };
 
+    async data(walletId: string) {
+        return await this.client.postJson(
+            this.endpoints.wallet.data,
+            {
+                queryParameters: {
+                    walletId: walletId
+                }
+            }
+        )
+    };
+
     async inscribe(
         walletId: string,
         file: File,
@@ -204,7 +214,7 @@ class WalletApi {
         dryRun: boolean = false,
     ) {
         return await this.client.postFormData(
-            this.endpoints.wallet.receive,
+            this.endpoints.wallet.inscribe,
             {
                 queryParameters: {
                     walletId: walletId
@@ -327,16 +337,27 @@ export async function loadOrdinalData(id: string) {
 
 }
 
-export const reloadState = async () => {
+export const reloadState = async (new_token?: string) => {
     // Init session.
     console.debug("initializing state...")
-    const token = localStorage.getItem("token");
+    var token;
+    if (new_token) {
+        localStorage.setItem("token", new_token)
+        token = new_token;
+    } else {
+        token = localStorage.getItem("token");
+    }
+    userState.reloading = true;
     if (token) {
         userState.authClient = client.AuthClient();
         userState.walletClient = client.walletClient(token);
         console.debug("token found...")
-        userState.info = jwt_decode(token);
-        if (userState.info.exp < Date.now()) {
+        const decoded = jwt_decode(token) as any;
+        userState.info = {
+            username: decoded?.id,
+            exp: decoded?.exp as number
+        }
+        if (userState.info!.exp * 1000 < Date.now()) {
             console.debug("token is expired, clearing...")
             localStorage.clear();
             userState.token = undefined;
@@ -344,14 +365,28 @@ export const reloadState = async () => {
         }
         userState.token = token;
         userState.walletClient = client.walletClient(token);
-        userState.wallets = await userState.walletClient.wallets().then(r => r.json());
+        userState.wallets = await Promise.all(decoded.wallets.map(async (w: string) => {
+            const data = await userState.walletClient?.data(w);
+            const walletData = await data?.json()
+            return {
+                id: w,
+                balance: walletData.balance.cardinal,
+                transactions: walletData.transactions,
+                addresses: walletData.addresses,
+                inscriptions: walletData.inscriptions.map((i: any) => i.inscription)
+            }
+        }
+        ))
+        console.log()
     } else {
         console.debug("token not found...")
     }
+    userState.reloading = false;
 }
 
-
-export const userState = reactive({
+export const defaultState = {
+    SatToUSD: 1,
+    reloading: false,
     lastFeeUpdate: new Date(),
     fees: {
         fastestFee: undefined,
@@ -360,31 +395,46 @@ export const userState = reactive({
         economyFee: undefined,
         minimumFee: undefined
     },
-    walletClient: client.walletClient("token"),
+    walletClient: undefined,
+    // client.walletClient("token"),
     authClient: client.AuthClient(),
-    token: "sdfsfsd",
-    info: {
-        username: "carlos",
-        exp: 0
-    },
-    wallets: [{
-        id: "4b9cb0a6-f9ca-4411-b865-bc9bf68ecbd3",
-        balance: 4646,
-        transactions: [
-            "9e32dc186f42cae7813845dee50221d47a406686ffaf51126501bb8642d52845",
-            "9e32dc186f42cae7813845dee50221d47a406686ffaf51126501bb8642d52845",
-            "9e32dc186f42cae7813845dee50221d47a406686ffaf51126501bb8642d52845",
-        ],
-        addresses: [],
-        inscriptions: [
-            "d25f9daa2a873d38c41a2b69a8a11474f2ff12e594318661ae153cfa7f1b6ca5i0",
-            "b4065548e66597e3fb9aa3989daea4233f6e4fffbdc5c5d2f1f0d8dc39adf3a2i0",
-            "e9627ea545f2c29a6b60d27e0c3a14982813ff83b63587c7f3391d08e3d342a2i0",
-            "54ac327df95aacac3c20bc4fc3d4a37674168e81c13741726b3a894790a538a3i0",
-        ]
-    }]
-} as UserState);
+    // client.AuthClient(),
+    token: undefined,
+    info: undefined,
+    // {
+    //     username: "carlos",
+    //     exp: 0
+    // },
+    wallets: undefined,
+    // [
+    //     //     {
+    //     //     id: "4b9cb0a6-f9ca-4411-b865-bc9bf68ecbd3",
+    //     //     balance: 4646,
+    //     //     transactions: [
+    //     //         "9e32dc186f42cae7813845dee50221d47a406686ffaf51126501bb8642d52845",
+    //     //         "9e32dc186f42cae7813845dee50221d47a406686ffaf51126501bb8642d52845",
+    //     //         "9e32dc186f42cae7813845dee50221d47a406686ffaf51126501bb8642d52845",
+    //     //     ],
+    //     //     addresses: [
+    //     //         // "bc1phyhfywd23et3rjx8mau88l50q759yfqkxakpq4qrr7npkh6wutxst80j63"
+    //     //     ],
+    //     //     inscriptions: [
+    //     //         "d25f9daa2a873d38c41a2b69a8a11474f2ff12e594318661ae153cfa7f1b6ca5i0",
+    //     //         "b4065548e66597e3fb9aa3989daea4233f6e4fffbdc5c5d2f1f0d8dc39adf3a2i0",
+    //     //         "e9627ea545f2c29a6b60d27e0c3a14982813ff83b63587c7f3391d08e3d342a2i0",
+    //     //         "54ac327df95aacac3c20bc4fc3d4a37674168e81c13741726b3a894790a538a3i0",
+    //     //     ]
+    //     // }
+    // ]
+}
 
+
+export var userState = reactive({ ...defaultState } as UserState);
+export function resetState() {
+    userState = { ...defaultState }
+    localStorage.clear();
+
+}
 export async function wait(ms: number) {
     await new Promise((r) => setTimeout(() => r(1), ms));
 }
@@ -405,6 +455,25 @@ async function watchers() {
                 userState.lastFeeUpdate = new Date()
                 // 1 minute
                 await wait(60000);
+            }
+        })(),
+        (async () => {
+            while (true) {
+                // wallet state watcher
+                await reloadState()
+                // 5 minutes
+                await wait(5 * 60000);
+            }
+        })(),
+        (async () => {
+            while (true) {
+                // BTC ticker watcher
+                const ticker = await fetch("https://blockchain.info/ticker").then(r => r.json())
+                const BTCtoUSD = ticker["USD"].last;
+                const SatToUSD = BTCtoUSD / 100000000;
+                userState.SatToUSD = SatToUSD;
+                // 5 minutes
+                await wait(5 * 60000);
             }
         })()
     ])

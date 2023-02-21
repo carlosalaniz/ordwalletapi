@@ -9,7 +9,7 @@ import { userState } from "../client";
 export default {
     data() {
         return {
-            walletState: userState,
+            userState,
             messages: [
                 "Create",
                 "Store",
@@ -21,24 +21,21 @@ export default {
     }
 }
 </script>
-<style scoped>
-
-</style>
+<style scoped></style>
 <template>
     <div class="container">
         <h1>>
             <DeleteAndType :messages="messages" :show-for="2000" /> Inscriptions
         </h1>
-        <div class="grid">
+        <div class="grid" v-if="!userState.token">
             <RouterLink role="button" class="secondary" to="/register">Register</RouterLink>
             <!-- <button class="secondary">Register</button> -->
             <RouterLink role="button" class="contrast" to="/login">Login</RouterLink>
-
         </div>
         <article>
-            Your all-in-one wallet for inscribing, storing, viewing, and trading Ordinals. View your balances,
+            Your all-in-one wallet for inscribing, storing, viewing, and trading inscriptions. View your balances,
             transactions, and inscriptions in the dashboard, or easily send/receive inscriptions to any wallet that supports coin management.
-            To get started, create your wallet here.
+            To get started, register above.
         </article>
     </div>
 </template>

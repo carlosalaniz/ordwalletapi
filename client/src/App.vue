@@ -110,17 +110,18 @@ nav .router-link-active {
 .lean-right {
   text-align: right;
 }
-.top-margin {
-    margin-top:   calc(var(--block-spacing-vertical) + 3.5rem)
 
+.top-margin {
+  margin-top: calc(var(--block-spacing-vertical) + 3.5rem)
 }
 </style>
 <style>
 body {
   min-height: 900px;
 }
+
 body>main {
-    padding-top: unset !important;
+  padding-top: unset !important;
 }
 </style>
 <template>
@@ -143,6 +144,9 @@ body>main {
       </li>
     </ul>
     <ul>
+      <li v-if="userState.token">
+        <a href="#" @click="logout()">Logout</a>
+      </li>
       <li>
         <RouterLink to="/">Home</RouterLink>
       </li>
@@ -152,13 +156,13 @@ body>main {
       <li>
         <a href="#" disabled data-tooltip="Coming soon" data-placement="bottom" class="secondary">Marketplace</a>
       </li>
-      <li class="wide_only">|</li>
-      <li class="wide_only">
+      <li class="">|</li>
+      <li class="">
         <a href="#" target="_blank" class="contrast">
           <IconTwitter />
         </a>
       </li>
-      <li class="wide_only">
+      <li class="">
         <a href="#" target="_blank" class="contrast">
           <IconDiscord />
         </a>
@@ -170,8 +174,8 @@ body>main {
       <span class="message">{{ overlay_message }}</span>
     </div>
   </div>
-  
-  <RouterView class="top-margin"  />
+
+  <RouterView class="top-margin" />
   <div class="container">
     <footer class="lean-right">
       <hr>
@@ -180,23 +184,28 @@ body>main {
       </p>
     </footer>
   </div>
+  <dialog :open="userState.reloading">
+    <article>
+      <span aria-busy="true">Loading your wallet data, please wait... </span>
+    </article>
+  </dialog>
 </template>
 <script lang="ts">
-import { userState } from "./client";
+import { userState, resetState } from "./client";
 import router from './router';
 export default {
   name: "App",
   data() {
     return {
       overlay_message: undefined as undefined | string,
-      walletState: userState
+      userState
     }
   },
   mounted() {
     // this.updateCurrentPage()
   },
   watch: {
-    'walletState.token': function (newToken) {
+    'userState.token': function (newToken) {
       if (!newToken) {
         this.showMessageFor("Your session timed out, please login again.", 5000)
         router.push("/");
@@ -204,6 +213,9 @@ export default {
     }
   },
   methods: {
+    logout() {
+      resetState()
+    },
     showMessageFor(message: string, forMS: number) {
       this.overlay_message = message;
       setTimeout(() => {

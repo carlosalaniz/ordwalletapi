@@ -49,7 +49,7 @@ export default {
 <template>
     <section class="rounded-bottom">
         <span>
-            <span><b>Latest fee estimates:</b></span>
+            <span><b><abbr title="Provided by mempool.">Latest estimates.</abbr></b></span>
         </span>
         <table :class="{ blink: blink, animated: true }">
             <thead>
@@ -62,10 +62,10 @@ export default {
             </thead>
             <tbody>
                 <tr>
-                    <td>{{ userState.fees.economyFee }}</td>
-                    <td>{{ userState.fees.hourFee }}</td>
-                    <td>{{ userState.fees.halfHourFee }}</td>
-                    <td>{{ userState.fees.fastestFee }}</td>
+                    <td>{{ userState.fees?.economyFee }}</td>
+                    <td>{{ userState.fees?.hourFee }}</td>
+                    <td>{{ userState.fees?.halfHourFee }}</td>
+                    <td>{{ userState.fees?.fastestFee }}</td>
                 </tr>
             </tbody>
         </table>

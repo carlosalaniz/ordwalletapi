@@ -11,6 +11,8 @@ import * as swaggerJson from "./swagger.json";
 import cors from 'cors';
 import { RegisterRoutes } from "./routes";
 import { ValidateError } from "tsoa";
+import { ErrorCodes } from "./ord/helpers/errorMessages";
+import { KnownError } from "./authentication";
 
 
 
@@ -26,7 +28,7 @@ import { ValidateError } from "tsoa";
         if ("165.22.28.98" === req.headers["x-real-ip"]) {
             res.status(429);
             res.json({ status: 429, message: "too many requests." })
-        } else   {
+        } else {
             next()
         }
     });
@@ -44,6 +46,9 @@ import { ValidateError } from "tsoa";
                 message: "Validation Failed",
                 details: err?.fields,
             });
+        }
+        if (err instanceof KnownError) {
+            return res.status(400).json(err.message);
         }
         if (err instanceof Error) {
             return res.status(500).json({

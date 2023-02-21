@@ -6,6 +6,74 @@
 		"requestBodies": {},
 		"responses": {},
 		"schemas": {
+			"ErrorCodes": {
+				"enum": [
+					"NOT_ENOUGH_CARDINAL",
+					"BAD_ADDRESS_VALUE",
+					"BAD_INSCRIPTION_VALUE",
+					"INSCRIPTION_NOT_IN_WALLET",
+					"NOT_YOUR_WALLET",
+					"USER_NAME_UNAVAILABLE",
+					"BAD_LOGIN_ATTEMPT",
+					"NO_TOKEN",
+					"NOT_ALLOWED"
+				],
+				"type": "string"
+			},
+			"CardinalBalance": {
+				"properties": {
+					"cardinal": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"cardinal"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Inscription": {
+				"description": "Inscription query result",
+				"properties": {
+					"inscription": {
+						"type": "string",
+						"description": "Example: \"bebefd42cf76983bdd24df8dfd565b816a049ef78b1dd5c5797b7be3bb8fd9c1i0\""
+					},
+					"location": {
+						"type": "string",
+						"description": "Example: \"bebefd42cf76983bdd24df8dfd565b816a049ef78b1dd5c5797b7be3bb8fd9c1:0:0\""
+					},
+					"explorer": {
+						"type": "string",
+						"description": "Example: \"https://ordinals.com/inscription/bebefd42cf76983bdd24df8dfd565b816a049ef78b1dd5c5797b7be3bb8fd9c1i0\""
+					}
+				},
+				"required": [
+					"inscription",
+					"location",
+					"explorer"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"BTCTransactions": {
+				"properties": {
+					"transaction": {
+						"type": "string"
+					},
+					"confirmations": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"transaction",
+					"confirmations"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"Ord": {
 				"properties": {
 					"inscription_number": {
@@ -45,72 +113,6 @@
 				},
 				"required": [
 					"id"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"CardinalBalance": {
-				"properties": {
-					"cardinal": {
-						"type": "number",
-						"format": "double"
-					}
-				},
-				"required": [
-					"cardinal"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"ErrorCodes": {
-				"enum": [
-					"NOT_ENOUGH_CARDINAL",
-					"BAD_ADDRESS_VALUE",
-					"BAD_INSCRIPTION_VALUE",
-					"INSCRIPTION_NOT_IN_WALLET"
-				],
-				"type": "string"
-			},
-			"BTCTransactions": {
-				"properties": {
-					"transaction": {
-						"type": "string"
-					},
-					"confirmations": {
-						"type": "number",
-						"enum": [
-							4
-						],
-						"nullable": false
-					}
-				},
-				"required": [
-					"transaction",
-					"confirmations"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Inscription": {
-				"description": "Inscription query result",
-				"properties": {
-					"inscription": {
-						"type": "string",
-						"description": "Example: \"bebefd42cf76983bdd24df8dfd565b816a049ef78b1dd5c5797b7be3bb8fd9c1i0\""
-					},
-					"location": {
-						"type": "string",
-						"description": "Example: \"bebefd42cf76983bdd24df8dfd565b816a049ef78b1dd5c5797b7be3bb8fd9c1:0:0\""
-					},
-					"explorer": {
-						"type": "string",
-						"description": "Example: \"https://ordinals.com/inscription/bebefd42cf76983bdd24df8dfd565b816a049ef78b1dd5c5797b7be3bb8fd9c1i0\""
-					}
-				},
-				"required": [
-					"inscription",
-					"location",
-					"explorer"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -261,8 +263,93 @@
 			"post": {
 				"operationId": "Register",
 				"responses": {
-					"204": {
-						"description": "No content"
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/ErrorCodes"
+										},
+										{
+											"properties": {
+												"addresses": {
+													"items": {
+														"type": "string"
+													},
+													"type": "array"
+												},
+												"transactions": {
+													"anyOf": [
+														{
+															"$ref": "#/components/schemas/ErrorCodes"
+														},
+														{
+															"items": {
+																"$ref": "#/components/schemas/BTCTransactions"
+															},
+															"type": "array"
+														}
+													]
+												},
+												"inscriptions": {
+													"anyOf": [
+														{
+															"$ref": "#/components/schemas/ErrorCodes"
+														},
+														{
+															"items": {
+																"$ref": "#/components/schemas/Inscription"
+															},
+															"type": "array"
+														}
+													]
+												},
+												"balance": {
+													"anyOf": [
+														{
+															"$ref": "#/components/schemas/ErrorCodes"
+														},
+														{
+															"$ref": "#/components/schemas/CardinalBalance"
+														}
+													]
+												},
+												"token": {}
+											},
+											"required": [
+												"addresses",
+												"transactions",
+												"inscriptions",
+												"balance",
+												"token"
+											],
+											"type": "object"
+										},
+										{
+											"properties": {
+												"transactions": {},
+												"inscriptions": {},
+												"balance": {},
+												"addresses": {
+													"items": {
+														"type": "string"
+													},
+													"type": "array"
+												},
+												"token": {}
+											},
+											"required": [
+												"addresses",
+												"token"
+											],
+											"type": "object"
+										}
+									]
+								}
+							}
+						}
 					}
 				},
 				"tags": [
@@ -298,8 +385,93 @@
 			"post": {
 				"operationId": "Login",
 				"responses": {
-					"204": {
-						"description": "No content"
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/ErrorCodes"
+										},
+										{
+											"properties": {
+												"addresses": {
+													"items": {
+														"type": "string"
+													},
+													"type": "array"
+												},
+												"transactions": {
+													"anyOf": [
+														{
+															"$ref": "#/components/schemas/ErrorCodes"
+														},
+														{
+															"items": {
+																"$ref": "#/components/schemas/BTCTransactions"
+															},
+															"type": "array"
+														}
+													]
+												},
+												"inscriptions": {
+													"anyOf": [
+														{
+															"$ref": "#/components/schemas/ErrorCodes"
+														},
+														{
+															"items": {
+																"$ref": "#/components/schemas/Inscription"
+															},
+															"type": "array"
+														}
+													]
+												},
+												"balance": {
+													"anyOf": [
+														{
+															"$ref": "#/components/schemas/ErrorCodes"
+														},
+														{
+															"$ref": "#/components/schemas/CardinalBalance"
+														}
+													]
+												},
+												"token": {}
+											},
+											"required": [
+												"addresses",
+												"transactions",
+												"inscriptions",
+												"balance",
+												"token"
+											],
+											"type": "object"
+										},
+										{
+											"properties": {
+												"transactions": {},
+												"inscriptions": {},
+												"balance": {},
+												"addresses": {
+													"items": {
+														"type": "string"
+													},
+													"type": "array"
+												},
+												"token": {}
+											},
+											"required": [
+												"addresses",
+												"token"
+											],
+											"type": "object"
+										}
+									]
+								}
+							}
+						}
 					}
 				},
 				"tags": [
@@ -426,19 +598,26 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"properties": {
-										"btcWallet": {
-											"$ref": "#/components/schemas/BTCWallet"
+									"anyOf": [
+										{
+											"properties": {
+												"btcWallet": {
+													"$ref": "#/components/schemas/BTCWallet"
+												},
+												"walletMnemonic": {
+													"$ref": "#/components/schemas/WalletMnemonic"
+												}
+											},
+											"required": [
+												"btcWallet",
+												"walletMnemonic"
+											],
+											"type": "object"
 										},
-										"walletMnemonic": {
-											"$ref": "#/components/schemas/WalletMnemonic"
+										{
+											"$ref": "#/components/schemas/ErrorCodes"
 										}
-									},
-									"required": [
-										"btcWallet",
-										"walletMnemonic"
-									],
-									"type": "object"
+									]
 								}
 							}
 						}
@@ -447,7 +626,11 @@
 				"tags": [
 					"wallet"
 				],
-				"security": [],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
 				"parameters": []
 			}
 		},
@@ -469,7 +652,11 @@
 				"tags": [
 					"wallet"
 				],
-				"security": [],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
 				"parameters": []
 			}
 		},
@@ -498,7 +685,11 @@
 				"tags": [
 					"wallet"
 				],
-				"security": [],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "query",
@@ -539,7 +730,11 @@
 				"tags": [
 					"wallet"
 				],
-				"security": [],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "query",
@@ -580,7 +775,11 @@
 				"tags": [
 					"wallet"
 				],
-				"security": [],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "query",
@@ -618,7 +817,11 @@
 				"tags": [
 					"wallet"
 				],
-				"security": [],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "query",
@@ -682,7 +885,11 @@
 				"tags": [
 					"wallet"
 				],
-				"security": [],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "query",
@@ -720,7 +927,11 @@
 				"tags": [
 					"wallet"
 				],
-				"security": [],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "query",
@@ -758,6 +969,116 @@
 						}
 					}
 				}
+			}
+		},
+		"/wallet/data": {
+			"post": {
+				"operationId": "GetWalletData",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"properties": {
+												"addresses": {
+													"items": {
+														"type": "string"
+													},
+													"type": "array"
+												},
+												"transactions": {
+													"anyOf": [
+														{
+															"$ref": "#/components/schemas/ErrorCodes"
+														},
+														{
+															"items": {
+																"$ref": "#/components/schemas/BTCTransactions"
+															},
+															"type": "array"
+														}
+													]
+												},
+												"inscriptions": {
+													"anyOf": [
+														{
+															"$ref": "#/components/schemas/ErrorCodes"
+														},
+														{
+															"items": {
+																"$ref": "#/components/schemas/Inscription"
+															},
+															"type": "array"
+														}
+													]
+												},
+												"balance": {
+													"anyOf": [
+														{
+															"$ref": "#/components/schemas/ErrorCodes"
+														},
+														{
+															"$ref": "#/components/schemas/CardinalBalance"
+														}
+													]
+												},
+												"token": {}
+											},
+											"required": [
+												"addresses",
+												"transactions",
+												"inscriptions",
+												"balance",
+												"token"
+											],
+											"type": "object"
+										},
+										{
+											"properties": {
+												"transactions": {},
+												"inscriptions": {},
+												"balance": {},
+												"addresses": {
+													"items": {
+														"type": "string"
+													},
+													"type": "array"
+												},
+												"token": {}
+											},
+											"required": [
+												"addresses",
+												"token"
+											],
+											"type": "object"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"wallet"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "walletId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
 			}
 		}
 	},

@@ -6,12 +6,13 @@ import { userState, reloadState } from "@/client"
 import OrdDetails from "./OrdDetails.vue"
 import LoadAsync from "@/components/LoadAsync.vue"
 import router from "@/router";
+
 export default {
     data() {
         return {
+            userState: userState as UserState,
             transferring: false,
             success: undefined,
-            userState,
             feeRate: undefined as number | undefined,
             inscription: undefined as string | undefined,
             destAddress: undefined as string | undefined,
@@ -23,25 +24,25 @@ export default {
         Ordpicker,
         OrdDetails
     },
-    props: {
-        walletState: Object as PropType<WalletState>
-    },
     methods: {
         onSelected(ordId: string) {
             this.inscription = ordId;
         },
         async onSuccess() {
-            await reloadState();
             router.push("/wallet")
         },
         async send() {
+            //@ts-ignore
             this.sendInscription = async () => {
-                return await userState.walletClient!.send(
-                    this.walletState!.id,
+                const response = await userState.walletClient?.send(
+                    //@ts-ignore    
+                    this.userState.wallets?.at(0)?.id,
                     this.inscription!,
                     this.feeRate!,
                     this.destAddress!
                 )
+                await reloadState();
+                return response;
             }
         }
     }
@@ -71,7 +72,7 @@ export default {
     </summary>
     <article>
         <h4>1: Pick an ordinal from your collection</h4>
-        <Ordpicker :available="walletState!.inscriptions!" :onPicked="onSelected" />
+        <Ordpicker :available="userState.wallets?.at(0)?.inscriptions!" :onPicked="onSelected" />
         <hr />
         <h4>2: Input destination address</h4>
         <input type="text" v-model="destAddress" placeholder="Example: bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq">

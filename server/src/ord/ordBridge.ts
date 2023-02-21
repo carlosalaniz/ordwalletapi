@@ -58,11 +58,13 @@ export class OrdBridge {
     static async restore(mnemonic: string): Promise<[WalletMnemonic, BTCWallet]> {
         throw 'not implemented';
     }
+
     private async checkWalletAndRun<T>(run: () => Promise<T | ErrorCodes>) {
         const a = await this.checkWalletPromise;
         if (a != false && a in ErrorCodes) return a; else if (a) throw a;
         return await run();
     }
+
     // Wallet data
     async balance(): Promise<CardinalBalance | ErrorCodes> {
         return await this.checkWalletAndRun(async () => {
@@ -101,7 +103,7 @@ export class OrdBridge {
      * @param feeRate  Use fee rate of <FEE_RATE> sats/vB [default: 2.0]
      * @param satpoint Sat to Inscribe
      */
-    async inscribe(filePath: string, feeRate: number = 2, options: { satpoint?: Satpoint, dryRun?: boolean }): Promise<InscriptionCreationResult | ErrorCodes> {
+    async inscribe(filePath: string, feeRate: number = 2, options: { satpoint?: Satpoint, dryRun?: boolean | string }): Promise<InscriptionCreationResult | ErrorCodes> {
         return await this.checkWalletAndRun(async () => {
             var command_elements = [
                 "--wallet",
@@ -115,7 +117,7 @@ export class OrdBridge {
                 command_elements.push("--sat-point", options.satpoint.satpoint);
             }
 
-            if (options.dryRun) {
+            if (options.dryRun && options.dryRun !== 'false') {
                 command_elements.push("--dry-run");
             }
 

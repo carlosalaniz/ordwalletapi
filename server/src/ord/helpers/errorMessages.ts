@@ -1,8 +1,21 @@
 // This are the error messages we surface.
 export enum ErrorCodes {
+    // Inscription error codes
     NOT_ENOUGH_CARDINAL = "NOT_ENOUGH_CARDINAL",
     BAD_ADDRESS_VALUE = "BAD_ADDRESS_VALUE",
     BAD_INSCRIPTION_VALUE = "BAD_INSCRIPTION_VALUE",
     INSCRIPTION_NOT_IN_WALLET = "INSCRIPTION_NOT_IN_WALLET",
+    NOT_YOUR_WALLET = "NOT_YOUR_WALLET",
+
+    // Auth error codes
+
+    USER_NAME_UNAVAILABLE = "USER_NAME_UNAVAILABLE",
+    BAD_LOGIN_ATTEMPT = "BAD_LOGIN_ATTEMPT",
+    NO_TOKEN = "NO_TOKEN",
+
+    //
+    NOT_ALLOWED = "NOT_ALLOWED"
+
+
 }
 

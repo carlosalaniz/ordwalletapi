@@ -1,6 +1,5 @@
 <script lang="ts">
 import OrdDetails from "./OrdDetails.vue"
-import { userState } from "../../client";
 import type { PropType } from "vue";
 
 export default {

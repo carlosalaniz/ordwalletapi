@@ -21,8 +21,8 @@ export default {
     },
     methods: {
         async onSuccess(data: { mnemonic: string, token: string }) {
-            localStorage.setItem("token", data.token);
-            await reloadState();
+            debugger;
+            await reloadState(data.token);
             this.mnemonic = data.mnemonic.split(" ");
         },
         confirmMnemonic() {
@@ -30,12 +30,14 @@ export default {
         },
         doRegister() {
             this.resister = async () => {
-                return await userState.authClient!.register(
+                //@ts-ignore
+                const response = await userState.authClient?.register(
                     {
                         username: this.username,
                         password: this.password
                     }
                 )
+                return response;
             }
         }
     }
@@ -75,7 +77,7 @@ export default {
 <template>
     <div class="container">
         <h1>Register an account.</h1>
-        <LoadAsync :call="resister" v-on-success="onSuccess" loading-message="Registering" />
+        <LoadAsync :call="resister" @success="onSuccess" loading-message="Registering" />
         <dialog :open="mnemonic.length > 0">
             <article aria-readonly="true" class="mnemonic">
                 <header>
