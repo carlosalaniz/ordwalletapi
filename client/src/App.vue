@@ -123,6 +123,12 @@ body {
 body>main {
   padding-top: unset !important;
 }
+
+.footer-message {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1rem;;
+}
 </style>
 <template>
   <nav class="container">
@@ -177,13 +183,16 @@ body>main {
 
   <RouterView class="top-margin" />
   <div class="container">
-    <footer class="lean-right">
-
+    <footer class="">
       <hr>
-
-      <p>
-        <small><a href="https://discord.gg/CpjqQe4X" target="_blank">Discord</a> / <a href="https://twitter.com/extra_ordinal" target="_blank">Twitter</a></small> [ Made with ❤️ in ATX ]
-      </p>
+      <div class="footer-message">
+        <span>
+          <small>Version: 0.1</small>
+        </span>
+        <span class="lean-right">
+          [ Made with ❤️ in ATX ]
+        </span>
+      </div>
     </footer>
   </div>
   <dialog :open="userState.reloading">

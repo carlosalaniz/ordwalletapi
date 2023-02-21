@@ -6,11 +6,12 @@ import type { PropType } from 'vue';
 export default {
     data() {
         return {
-            mnemonic: [] as string[],
+            mnemonic: null as null | [] as string[],
             username: "",
             password: "",
             passwordRepeat: "",
-            resister: undefined as any
+            resister: undefined as any,
+            errors: [] as string[]
         }
     },
     components: {
@@ -21,6 +22,7 @@ export default {
     },
     methods: {
         async onSuccess(data: { mnemonic: string, token: string }) {
+            this.mnemonic = [];
             await reloadState(data.token);
             this.mnemonic = data.mnemonic.split(" ");
         },
@@ -28,16 +30,27 @@ export default {
             router.push("/wallet")
         },
         doRegister() {
-            this.resister = async () => {
-                //@ts-ignore
-                const response = await userState.authClient?.register(
-                    {
-                        username: this.username,
-                        password: this.password
-                    }
-                )
-                return response;
+            if (this.password != this.passwordRepeat) {
+                this.errors.push("Passwords don't match.");
             }
+            if (!/^[a-z0-9_]+@[a-z0-9_]+\.[a-z]+$/i.test(this.username)) {
+                this.errors.push("Email field is not valid.");
+            }
+            if (this.errors.length === 0) {
+                this.resister = async () => {
+                    //@ts-ignore
+                    const response = await userState.authClient?.register(
+                        {
+                            username: this.username,
+                            password: this.password
+                        }
+                    )
+                    return response;
+                }
+            }
+        },
+        clearErrors() {
+            this.errors = []
         }
     }
 }
@@ -50,7 +63,6 @@ export default {
 .mnemonic details p {
     text-align: left !important;
 }
-
 
 .mnemonic .word {
     text-transform: uppercase;
@@ -72,13 +84,17 @@ export default {
     border: 1px solid var(--secondary);
 
 }
+
+.error {
+    color: var(--del-color)
+}
 </style>
 <template>
     <div class="container">
         <h1>Register an account.</h1>
         <LoadAsync :call="resister" @success="onSuccess" loading-message="Registering" />
-        <dialog :open="mnemonic.length > 0">
-            <article aria-readonly="true" class="mnemonic">
+        <dialog :open="mnemonic != null">
+            <article v-if="Array.isArray(mnemonic) && mnemonic.length > 0" aria-readonly="true" class="mnemonic">
                 <header>
                     Mnemonic
                 </header>
@@ -125,18 +141,19 @@ export default {
         <article>
             <div>
                 Email
-                <input v-model="username" type="email" placeholder="Email" />
+                <input @change="clearErrors" v-model="username" type="email" placeholder="Email" />
             </div>
             <div>
                 Password
-                <input v-model="password" type="password" placeholder="Password" />
+                <input @change="clearErrors" v-model="password" type="password" placeholder="Password" />
             </div>
             <div>
                 Repeat Password
-                <input v-model="passwordRepeat" type="password" placeholder="Repeat Password" />
+                <input @change="clearErrors" v-model="passwordRepeat" type="password" placeholder="Repeat Password" />
             </div>
             <hr />
             <button @click="doRegister()">Register</button>
+            <span v-for="error in errors" class="error">Error: {{ error }} </span>
         </article>
     </div>
 </template>

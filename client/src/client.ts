@@ -338,6 +338,7 @@ export async function loadOrdinalData(id: string) {
 }
 
 export const reloadState = async (new_token?: string) => {
+    userState.reloading = true;
     // Init session.
     console.debug("initializing state...")
     var token;
@@ -347,7 +348,6 @@ export const reloadState = async (new_token?: string) => {
     } else {
         token = localStorage.getItem("token");
     }
-    userState.reloading = true;
     if (token) {
         userState.authClient = client.AuthClient();
         userState.walletClient = client.walletClient(token);

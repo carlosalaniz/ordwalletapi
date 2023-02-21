@@ -37,25 +37,25 @@ const router = createRouter({
           path: "",
           name: "dashboard",
           component: WalletHomeView,
-          
+
         },
         {
           path: "inscribe",
           name: "Inscribe",
           component: WalletInscribeView,
-          
+
         },
         {
           path: "send",
           name: "Send",
           component: WalletSendView,
-          
+
         },
         {
           path: "receive",
           name: "receive",
           component: WalletReceiveView,
-          
+
         }
       ]
     },
@@ -72,10 +72,13 @@ const router = createRouter({
 const GuestRoutes = ['home', 'register', 'login']
 router.beforeEach((to, from) => {
   const name = to.name?.toString()
-  if (
-    !userState.token
-    && !GuestRoutes.includes(name!)) {
+  if (!userState.token && !GuestRoutes.includes(name!)) {
     router.push("/")
+    return false;
+  }
+
+  if (userState.token && GuestRoutes.includes(name!)) {
+    router.push("/wallet")
     return false;
   }
 })
