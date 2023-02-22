@@ -13,7 +13,7 @@ datasource db {
 model Users {
   id           String    @id @default(uuid())
   username     String    @unique
-  passowrd     String
+  password     String
   createdAt    DateTime  @default(now())
   lastLoggedIn DateTime  @default(now())
   lastActivity DateTime  @default(now())
@@ -23,7 +23,7 @@ model Users {
 model Wallets {
   id               String       @id
   addresses        BTCAddress[]
-  menemonic        String?
+  mnemonic        String?
   User             Users?       @relation(fields: [usersId], references: [id])
   lastKnownBalance Int?
   usersId          String?      @unique

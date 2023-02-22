@@ -3,6 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
+    "serve": "vue-cli-service serve --port 3005 --mode production --entry ./src/main.ts",
+    "build_vue": "vue-cli-service build --entry ./src/main.ts",
     "dev": "vite --host",
     "build": "run-p type-check build-only",
     "preview": "vite preview",
@@ -13,6 +15,7 @@
   "dependencies": {
     "@mempool/mempool.js": "^2.3.0",
     "@picocss/pico": "^1.5.7",
+    "@vue/cli-service": "^5.0.8",
     "deep-equal": "^2.2.0",
     "jwt-decode": "^3.1.2",
     "qrcode.vue": "^3.3.3",

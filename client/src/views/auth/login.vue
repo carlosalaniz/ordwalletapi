@@ -40,14 +40,16 @@ export default {
         <h1>Login</h1>
         <LoadAsync :call="login" @success="onSuccess" loading-message="Authenticating" />
         <article>
-            <div>
-                Email
-                <input v-model="username" type="email" placeholder="Email" />
-            </div>
-            <div>
-                Password
-                <input v-model="password" type="password" placeholder="Password" />
-            </div>
+            <form>
+                <div>
+                    Email
+                    <input v-model="username" autocomplete="username" type="email" placeholder="Email" />
+                </div>
+                <div>
+                    Password
+                    <input v-model="password" autocomplete="current-password" type="password" placeholder="Password" />
+                </div>
+            </form>
             <hr />
             <button @click="doLogin()">Login</button>
         </article>

@@ -26,9 +26,8 @@ export default {
         onSelected() {
             router.push(this.address)
         },
-        goTop(e: Event) {
-            const st = (e.target as HTMLElement).scrollTo;
-            st(0, 0)
+        goTop() {
+            window.scrollTo(0,0)
         }
     }
 
@@ -69,5 +68,5 @@ export default {
     <select v-model="address" @change="onSelected">
         <option :value="options.route" v-for="options in menu">{{ options.text }}</option>
     </select>
-    <a class="action_button" href="#" @click="goTop" role="button"></a>
+    <a class="action_button" href="#" @click="goTop()" role="button"></a>
 </template>

@@ -77,7 +77,7 @@ router.beforeEach((to, from) => {
     return false;
   }
 
-  if (userState.token && GuestRoutes.includes(name!)) {
+  if (name !== "home" && userState.token && GuestRoutes.includes(name!)) {
     router.push("/wallet")
     return false;
   }

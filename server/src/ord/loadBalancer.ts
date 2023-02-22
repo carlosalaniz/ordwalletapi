@@ -34,7 +34,7 @@ export default {
         const instances = Object.entries(state).map(([_, ord]) => ord.flat()).flat();
         instances.sort((a, b) => {
             // Ascending order
-            return a.lastPicked.getTime() - b.lastPicked.getTime()
+            return a.lastPicked?.getTime() ?? 0 - b.lastPicked?.getTime() ?? 0
         })
         const notBlocked = instances.filter(i => i.ord.lockStarted == null);
         if (notBlocked.length > 0) {

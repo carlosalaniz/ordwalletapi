@@ -7,7 +7,9 @@ export default {
     },
     emits: ["success", "warning", "error"],
     props: {
-        call: Object as PropType<() => Promise<Response>>,
+        call: {
+            type: Function as PropType<() => Promise<Response>>,
+        },
         loadingMessage: String,
         successMessage: String,
         warningMessage: String,
@@ -59,7 +61,6 @@ export default {
                     this.$emit("success", body);
                 } else if (/^4\d\d$/.test(status)) {
                     this.$emit("warning", body);
-                    debugger;
                     if (body in errorMessages) {
                         this.messages.server = errorMessages[body];
                     }

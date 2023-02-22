@@ -33,7 +33,7 @@ export default {
             if (this.password != this.passwordRepeat) {
                 this.errors.push("Passwords don't match.");
             }
-            if (!/^[a-z0-9_]+@[a-z0-9_]+\.[a-z]+$/i.test(this.username)) {
+            if (!/^[a-z0-9_.]+@[a-z0-9_]+\.[a-z]+$/i.test(this.username)) {
                 this.errors.push("Email field is not valid.");
             }
             if (this.errors.length === 0) {

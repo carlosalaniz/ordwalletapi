@@ -2,7 +2,7 @@
 CREATE TABLE `Users` (
     `id` VARCHAR(191) NOT NULL,
     `username` VARCHAR(191) NOT NULL,
-    `passowrd` VARCHAR(191) NOT NULL,
+    `password` VARCHAR(191) NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `lastLoggedIn` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `lastActivity` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
@@ -14,7 +14,7 @@ CREATE TABLE `Users` (
 -- CreateTable
 CREATE TABLE `Wallets` (
     `id` VARCHAR(191) NOT NULL,
-    `menemonic` VARCHAR(191) NULL,
+    `mnemonic` VARCHAR(191) NULL,
     `lastKnownBalance` INTEGER NULL,
     `usersId` VARCHAR(191) NULL,
 
@@ -26,6 +26,7 @@ CREATE TABLE `Wallets` (
 CREATE TABLE `BTCAddress` (
     `address` VARCHAR(191) NOT NULL,
     `walletsId` VARCHAR(191) NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
     UNIQUE INDEX `BTCAddress_address_key`(`address`),
     PRIMARY KEY (`address`)

@@ -1,6 +1,6 @@
 import { OrdBridge } from "./ord/ordBridge"
 import { PrismaClient } from '@prisma/client';
-import data from '/home/user/software/scraper/ordIndex.json'
+import data from '/home/user/software/scraper/ordIndex2.json'
 (async () => {
     // const newWallet = await OrdBridge.create("new_wallet_6")
     // const bridge = new OrdBridge({ id: "new_wallet_6" });
@@ -20,22 +20,22 @@ import data from '/home/user/software/scraper/ordIndex.json'
     // console.log(transactions, inscriptions, receive, balance, inscribe, send);
 
 
-        const prisma = new PrismaClient();
-        const d = (data as string[]).map((s, i) => {
-            return {
-                inscription_number: i,
-                id: s
-            }
-        })
-        const a = d.filter(a=>a.id == null || a.inscription_number == null);
-        await prisma.ord.createMany(
-            {
-                data: d,
-                skipDuplicates: true,
-            },
-            
-        )
-    
-    
-    
+    const prisma = new PrismaClient();
+    const d = (data as string[]).map((s, i) => {
+        return {
+            inscription_number: i+99916,
+            id: s
+        }
+    })
+    const a = d.filter(a => a.id == null || a.inscription_number == null);
+    await prisma.ord.createMany(
+        {
+            data: d,
+            skipDuplicates: true,
+        },
+
+    )
+
+
+
 })()

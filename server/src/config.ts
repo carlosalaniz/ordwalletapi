@@ -18,13 +18,15 @@ class Config {
     }
 
     // secret to sign jwt
-    JWT_SIGNING_SECRET = "sdf";
+    JWT_SIGNING_SECRET = "achurrascariamos arracimadas charran desmoralice gallofado exfoliabas armamentisticas malqueres";
+
+    SALT_ROUNDS = 10;
 
     // comma separated rpc nodes to connect to. Format {address};{cookieFilePath}
     #BTC_NODES: BTC_NODES_CONFIG[] = null;
     get BTC_NODES() {
         if (this.#BTC_NODES) return this.#BTC_NODES;
-        const value = process.env.BTC_NODES ?? "http://192.168.1.11:8332;/home/user/carlos.cookie"
+        const value = process.env.BTC_NODES ?? "http://192.168.1.7:8332;/home/user/carlos.cookie"
         const nodesConfig: BTC_NODES_CONFIG[] = value.split(",").map(v => {
             const btc_node_paths = v.split(";");
             return {
@@ -40,7 +42,7 @@ class Config {
     #ORD_BINARY_PATHS: ORD_BINARY_PATHS[] = null
     get ORD_BINARY_PATHS() {
         if (this.#ORD_BINARY_PATHS) return this.#ORD_BINARY_PATHS;
-        const value = process.env.ORD_DATA_PATHS ?? "5.0:/home/user/ver/ord/target/release/ord:/home/user/docker/data.copy/5.0/"
+        const value = process.env.ORD_DATA_PATHS ?? "5.0:/home/user/ver/ord/target/release/ord:/home/user/docker/data.copy/5.0/,5.0:/home/user/ver/ord/target/release/ord:/home/user/docker/data/5.0/"
         const ordDataPaths: ORD_BINARY_PATHS[] = value.split(",").map(v => {
             const pathValues = v.split(":");
             return {
@@ -65,12 +67,16 @@ class Config {
 
     // amount of time in ms ord should try to index
     get INDEX_ORD_EVERY() {
-        return process.env.INDEX_ORD_EVERY ? +process.env.INDEX_ORD_EVERY : 60 * 60 * 1000; // once every hour.
+        return process.env.INDEX_ORD_EVERY ? +process.env.INDEX_ORD_EVERY : 30 * 60 * 1000; // once every 30 minutes.
     };
 
     // amount of time in ms ord should try to index
     get INSCRIPTIONS_IMAGE_FOLDER() {
-        return process.env.INSCRIPTIONS_IMAGE_FOLDER ?? "/home/user/inscriptions/"; // once every hour.
+        return process.env.INSCRIPTIONS_IMAGE_FOLDER ?? "/home/user/inscriptions_prod/";
     };
+
+    get RUN_AS() {
+        return process.env.RUN_AS ?? "DEBUG"
+    }
 }
 export default new Config()

@@ -1,10 +1,10 @@
 import { randomUUID } from "crypto";
-import { Tags, Route, Security, Controller, Post, Body } from "tsoa";
+import { Tags, Route, Controller, Post, Body } from "tsoa";
 import config from "../config";
 import { ErrorCodes } from "../ord/helpers/errorMessages";
 import { OrdBridge } from "../ord/ordBridge";
 import { loadUserData } from "../tooling/utils";
-
+import bcrypt from 'bcrypt'
 @Tags("authentication")
 @Route("/authentication")
 // @Security('api_key')
@@ -22,15 +22,16 @@ export class AuthenticationController extends Controller {
                 this.setStatus(400);
                 return ErrorCodes.USER_NAME_UNAVAILABLE as ErrorCodes
             } else {
+                const password = await bcrypt.hash(body.password, config.SALT_ROUNDS)
                 const walletId = randomUUID();
                 const wallet = await OrdBridge.create(walletId);
                 const newUser = await config.prisma.users.create({
                     data: {
                         username: body.username,
-                        passowrd: body.password,
+                        password: password,
                         wallet: {
                             create: {
-                                menemonic: wallet[0].mnemonic,
+                                mnemonic: wallet[0].mnemonic,
                                 id: walletId,
                                 lastKnownBalance: 0
                             }
@@ -52,7 +53,7 @@ export class AuthenticationController extends Controller {
         }
     ) {
         const user = await config.prisma.users.findFirst({ where: { username: body.username } });
-        if (!user) {
+        if (!user || !await bcrypt.compare(body.password, user.password)) {
             this.setStatus(400);
             return ErrorCodes.BAD_LOGIN_ATTEMPT as ErrorCodes
         }

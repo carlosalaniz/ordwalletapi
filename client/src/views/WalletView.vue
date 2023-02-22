@@ -68,10 +68,7 @@ export default {
                     <p>
                         Balance
                         <br />
-                        <RouterLink to="/wallet#balance" 
-                        :data-tooltip='`~${(userState.SatToUSD * (userState.wallets?.at(0)?.balance || 0)).toFixed(2)} USD`' 
-                        data-placement="top"
-                        >{{ userState.wallets?.at(0)?.balance }}</RouterLink>
+                        <RouterLink to="/wallet#balance" :data-tooltip='`~${(userState.SatToUSD * (userState.wallets?.at(0)?.balance || 0)).toFixed(2)} USD`' data-placement="top">{{ userState.wallets?.at(0)?.balance }}</RouterLink>
                     </p>
                     <p>
                         Inscriptions in wallet
@@ -81,7 +78,7 @@ export default {
                     <p>
                         Pending transactions
                         <br />
-                        <RouterLink to="/wallet#transactions">{{ userState.wallets?.at(0)?.transactions.length }}</RouterLink>
+                        <RouterLink to="/wallet#transactions">{{ userState.wallets?.at(0)?.transactions.filter(t => t.confirmations === 0).length }}</RouterLink>
                     </p>
                 </blockquote>
             </div>

@@ -14,7 +14,7 @@ export class CommandQueue {
 
     private queue:
         { [key: string]: deferredType<any> } = {};
-    constructor(private maxParallelCommands) {
+    constructor(private maxParallelCommands, private id: string = randomUUID()) {
         this.runner()
     }
 
@@ -32,7 +32,7 @@ export class CommandQueue {
                 continue;
             }
             this.locked = new Date();
-            logger.debug("CommandQueue", queueSize)
+            logger.debug("CommandQueue", this.id, queueSize)
             // Pick the commands that will be run in this iteration
             const parallelCommands =
                 Object.entries(this.queue).slice(0, this.maxParallelCommands);
@@ -45,10 +45,10 @@ export class CommandQueue {
             const promises = parallelCommands.map(c => c[1].promise);
 
             // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/all#description
-            try{
+            try {
                 await Promise.all(promises);
-            }catch(e){
-               // Do nothing, the exception should be handled upstream, run command will catch it too.
+            } catch (e) {
+                // Do nothing, the exception should be handled upstream, run command will catch it too.
             }
             for (const [queueKey, _] of parallelCommands) {
                 // remove the commands from the queue.

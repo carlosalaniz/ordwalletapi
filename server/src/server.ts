@@ -11,13 +11,14 @@ import * as swaggerJson from "./swagger.json";
 import cors from 'cors';
 import { RegisterRoutes } from "./routes";
 import { ValidateError } from "tsoa";
-import { ErrorCodes } from "./ord/helpers/errorMessages";
 import { KnownError } from "./authentication";
+import serveStatic from 'serve-static';
+import history from 'connect-history-api-fallback';
 
 
 
 (async () => {
-    const port = 3001;
+    const port = 3005;
     // Server config
     const app = express();
     app.use(cors());
@@ -32,8 +33,19 @@ import { KnownError } from "./authentication";
             next()
         }
     });
-    app.use(["/openapi", "/docs", "/swagger"], swaggerUI.serve, swaggerUI.setup(swaggerJson));
+    if (config.RUN_AS === "DEBUG") {
+        app.use(["/openapi", "/docs", "/swagger"], swaggerUI.serve, swaggerUI.setup(swaggerJson));
+    }
+
     RegisterRoutes(app);
+
+
+    const distVue = __dirname + "/../../client/dist";
+    app.use(history());
+    app.use(serveStatic(distVue));
+    app.get('/', (req, res) => {
+        res.sendFile(distVue + '/index.html');
+    })
     app.use(function errorHandler(
         err: unknown,
         req: ExRequest,
