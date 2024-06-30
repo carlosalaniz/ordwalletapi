@@ -37,7 +37,8 @@ export default {
             this.estimate()
         },
         estimate() {
-            this.estimateCal = Math.round(this.byteSize / 4 * this.fee! ?? 0)
+            const estimate = Math.round((this.byteSize / 4 * this.fee! ?? 0) * 1.2);
+            this.estimateCal = (estimate && estimate + 10000) ?? 0
         },
         doInscribe() {
             //@ts-ignore
@@ -122,9 +123,9 @@ export default {
                 <p>The estimate gives you an idea of how much the transaction will cost in SATS. We do our best
                     to provide accurate estimates; however, it is still an estimate and may not be 100% accurate
                     every time. Once you click 'Inscribe!' below, your transaction will go through as long as you have
-                    enough funds. If you do not have enough funds, you will receive an error message.</p>
+                    enough funds. If you do not have enough funds, you will receive an error message. When inscribing 10,000 sats get added to the transaction, this will be returned to your wallet as soon as the inscription is confirmed</p>
                 We use the following formula to calculate our estimates:
-                <kbd>((Size in KB * 1000) / 4 * fee_rate)</kbd>
+                <kbd>((Size in KB * 1000) / 4 * fee_rate * 1.2) + 10000</kbd>
             </details>
 
             <h4>4. Go Brrrrr...</h4>
