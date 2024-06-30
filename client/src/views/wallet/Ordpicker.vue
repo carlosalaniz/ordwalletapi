@@ -103,7 +103,7 @@ export default {
         </article>
     </dialog>
     <article :class="{ clearfix: selected }">
-        <button v-if="!selected" class="no-bottom-margin" @click="modal = true">Pick an ordinal</button>
+        <button v-if="!selected" class="no-bottom-margin" @click="modal = true">Pick an Inscription</button>
         <OrdDetails v-if="selected" :ordId="selected" action-text="Change" @action-activated="() => { modal = true }" />
     </article>
 </template>

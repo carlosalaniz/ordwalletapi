@@ -68,10 +68,10 @@ export default {
     </div>
     <hr />
     <summary>
-        <h3 class="no-bottom-margin">Send an Ordinal</h3>
+        <h3 class="no-bottom-margin">Send an Inscription</h3>
     </summary>
     <article>
-        <h4>1: Pick an ordinal from your collection</h4>
+        <h4>1: Pick an inscription from your collection</h4>
         <Ordpicker :available="userState.wallets?.at(0)?.inscriptions!" :onPicked="onSelected" />
         <hr />
         <h4>2: Input destination address</h4>

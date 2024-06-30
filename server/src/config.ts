@@ -42,7 +42,11 @@ class Config {
     #ORD_BINARY_PATHS: ORD_BINARY_PATHS[] = null
     get ORD_BINARY_PATHS() {
         if (this.#ORD_BINARY_PATHS) return this.#ORD_BINARY_PATHS;
-        const value = process.env.ORD_DATA_PATHS ?? "5.0:/home/user/ver/ord/target/release/ord:/home/user/docker/data.copy/5.0/,5.0:/home/user/ver/ord/target/release/ord:/home/user/docker/data/5.0/"
+        const value = process.env.ORD_DATA_PATHS ??
+            [
+                ["5.1", "/home/user/ver/ord/target/release/ord", "/home/user/ord-db/5.1/"].join(":"),
+                ["5.1", "/home/user/ver/ord/target/release/ord", "/home/user/ord-db/5.1-backup/"].join(":")
+            ].join(",")
         const ordDataPaths: ORD_BINARY_PATHS[] = value.split(",").map(v => {
             const pathValues = v.split(":");
             return {

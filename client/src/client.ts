@@ -326,13 +326,15 @@ const client = new Client();
 
 export async function loadOrdinalData(id: string) {
     const contents = await fetch("https://ordapi.xyz/inscription/" + id).then(r => r.json());
+    const sat = contents["sat"].split("/")[2];
+    const satData = await fetch("https://ordapi.xyz/sat/" + sat).then(r => r.json());
     return {
         number: contents["inscription_number"],
         contentLength: contents["content length"],
         contentType: contents["content type"],
         timestamp: contents["timestamp"],
-        SAT: contents["sat"].split("/")[1],
-        rarity: "unknown"
+        SAT: sat,
+        rarity: satData.rarity
     }
 
 }

@@ -25,8 +25,9 @@ import history from 'connect-history-api-fallback';
     app.use(bodyParser.json());
     app.use(function logMethod(req, res, next) {
         console.log(`POST ${req.originalUrl}`, req.headers["x-real-ip"], new Date());
-        next(); return;
+        // next(); return;
         if ("165.22.28.98" === req.headers["x-real-ip"]) {
+            console.log(`POST ${req.originalUrl}`, req.headers["x-real-ip"], "rate limited")
             res.status(429);
             res.json({ status: 429, message: "too many requests." })
         } else {
